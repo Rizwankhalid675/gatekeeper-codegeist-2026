@@ -225,6 +225,23 @@ test('R08 passes a reviewer that cites the evidence honestly', () => {
   assert.match(ruleOf(v, 'R08').detail, /verified against source evidence/);
 });
 
+test('R08 reads sensibly when the reviewer cited nothing', () => {
+  // "0 citation(s) verified against source evidence" reads like a failure on a
+  // panel, and an operator scanning eleven green rules should not have to stop
+  // on one that looks wrong. Citing nothing is allowed; fabricating is not.
+  const bundle = bundleFor();
+  const v = decide({
+    proposal: proposalFor(bundle),
+    review: reviewConfirm({ quotes: [] }),
+    bundle,
+    rulePack: openPack(),
+    now: NOW,
+  });
+  assert.equal(v.disposition, DISPOSITION.AUTO, v.reason);
+  assert.match(ruleOf(v, 'R08').detail, /nothing to fabricate/);
+  assert.doesNotMatch(ruleOf(v, 'R08').detail, /^0 citation/);
+});
+
 test('R09 holds a priority the project reserves for humans', () => {
   const bundle = bundleFor(incident({ priority: 'Highest' }));
   const v = decide({

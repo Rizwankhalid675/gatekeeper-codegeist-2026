@@ -181,7 +181,9 @@ export function decide({ proposal, review = null, bundle, rulePack, now }) {
       ? fabricated
         ? `${quoteCheck.unverified.length} of ${quoteCheck.checked} citation(s) are not in the source evidence: ` +
           quoteCheck.unverified.map((q) => JSON.stringify(trim(q))).join(', ')
-        : `${quoteCheck.checked} citation(s) verified against source evidence`
+        : quoteCheck.checked === 0
+          ? 'reviewer offered no citations, so there was nothing to fabricate'
+          : `${quoteCheck.checked} citation(s) verified against source evidence`
       : 'no review performed',
     DISPOSITION.HOLD,
   );
