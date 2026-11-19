@@ -70,6 +70,30 @@ Capture **tab-scoped only** — never a full desktop. Each of these is a separat
 - Three takes. The third is the good one.
 - If one beat is perfect, make it the 0:00–0:25 opener.
 
+## GIF capture was tried and measured. It is not usable footage.
+
+Recorded the rule pack toggle through the browser extension's GIF recorder, with
+every overlay disabled (the default export adds a Claude watermark, which is a
+third-party trademark the rules bar without permission).
+
+Result, measured with ffprobe rather than judged by eye:
+
+    nb_frames=6   duration=7.400000   ->  0.81 fps
+    1568x740, 1.1 MB
+
+That is a slideshow of state changes, not a recording. It captures one frame per
+tool action, so it shows the before and after of a click and nothing in between.
+The recorder also caps at 50 frames, which at a merely tolerable 12 fps is about
+four seconds of footage for a five-minute video.
+
+The stills in `docs/img/beats/` are better than any frame of it, and they came
+from the same mechanism.
+
+**Use macOS screen recording.** It is the only route here that produces real
+footage, and it lets the narration be recorded live against the picture instead
+of timed to it afterwards. `docs/img/beats/rulepack-toggle.gif` is kept only as
+the evidence behind this conclusion.
+
 ## What is still needed from a human
 
 - **Narration.** Either record it, or generate it (the NightShift project has
