@@ -60,20 +60,20 @@
   <!-- 1. PROBLEM — open with the number, never the architecture -->
   <section class="slide on">
     <div class="eyebrow">The problem</div>
-    <div class="big">{{BIG_NUMBER}}</div>
-    <h2 style="margin-top:1.2rem">{{PROBLEM_HEADLINE}}</h2>
-    <p class="lead">{{PROBLEM_DETAIL}}</p>
+    <div class="big">5</div>
+    <h2 style="margin-top:1.2rem">Teams are being asked to let agents act on production incidents</h2>
+    <p class="lead">And the audit trail is "the model said so". A service desk does not have a detection problem, it has a volume problem — but the obvious fix, letting a language model read the queue and act on it, is unacceptable the moment the queue belongs to someone else’s production system.</p>
   </section>
 
   <!-- 2. SOLUTION -->
   <section class="slide">
     <div class="eyebrow">codegeist-2026</div>
-    <h1>{{ONE_LINE}}</h1>
-    <p class="lead">{{SOLUTION_DETAIL}}</p>
+    <h1>Agentic incident triage for Jira Service Management: the model proposes, deterministic code decides, nothing executes without a receipt.</h1>
+    <p class="lead">Five. That is the complete set of things an agent can do to your Jira site through Gatekeeper — comment, transition, assign, link, label. Not "anything the REST API allows". There is no generic call-this-endpoint path in the codebase, so an action id can never become an arbitrary API call.</p>
     <div class="grid">
-      <div class="card"><div class="n">{{METRIC_1}}</div><div class="l">{{METRIC_1_LABEL}}</div></div>
-      <div class="card"><div class="n">{{METRIC_2}}</div><div class="l">{{METRIC_2_LABEL}}</div></div>
-      <div class="card"><div class="n">{{METRIC_3}}</div><div class="l">{{METRIC_3_LABEL}}</div></div>
+      <div class="card"><div class="n">11</div><div class="l">rules, all reported every time</div></div>
+      <div class="card"><div class="n">118</div><div class="l">tests, no Forge runtime needed</div></div>
+      <div class="card"><div class="n">0</div><div class="l">paths from an agent to an arbitrary Jira call</div></div>
     </div>
   </section>
 
@@ -82,40 +82,40 @@
     <div class="eyebrow">How it works</div>
     <h2>A model proposes. Code decides.</h2>
     <div class="flow">
-      <div class="node">{{INPUT}}</div><span class="arrow">&rarr;</span>
+      <div class="node">A JSM incident + a rule pack an administrator wrote</div><span class="arrow">&rarr;</span>
       <div class="node">LLM proposal</div><span class="arrow">&rarr;</span>
       <div class="node hot">Deterministic check</div><span class="arrow">&rarr;</span>
       <div class="node">Evidence receipt</div><span class="arrow">&rarr;</span>
-      <div class="node">{{OUTPUT}}</div>
+      <div class="node">reject / hold / auto, with all eleven rules reported and a signed receipt</div>
     </div>
-    <p class="lead" style="margin-top:1.6rem">{{ARCH_DETAIL}}</p>
+    <p class="lead" style="margin-top:1.6rem">Three trust levels. Correlation is deterministic and fully trusted: it decides what deserves attention at all, before a model is asked anything. The two Rovo agents are untrusted and load-bearing — delete them and there is no diagnosis, but they are never the authority. The policy gate and executor are deterministic and fully trusted: eleven rules decide whether a robot may act, and the executor re-derives permission from the rule pack rather than trusting the verdict it was handed.</p>
   </section>
 
   <!-- 4. PROOF — the before/after progression table -->
   <section class="slide">
     <div class="eyebrow">Measured, not claimed</div>
-    <h2>{{PROOF_HEADLINE}}</h2>
+    <h2>The reviewer fabricated a citation, and the gate caught it</h2>
     <table>
       <thead><tr><th>Version</th><th>What changed</th><th>Result</th><th>Gate</th></tr></thead>
       <tbody>
-        <tr><td>v1</td><td>{{V1_CHANGE}}</td><td>{{V1_RESULT}}</td><td>BLOCKED</td></tr>
-        <tr><td>v2</td><td>{{V2_CHANGE}}</td><td>{{V2_RESULT}}</td><td>BLOCKED</td></tr>
-        <tr><td>v3</td><td>{{V3_CHANGE}}</td><td>{{V3_RESULT}}</td><td>PASSED</td></tr>
+        <tr><td>v1</td><td>Gate written as eleven pure rules, reject beats hold beats auto</td><td>Verdicts became reproducible and auditable rule by rule</td><td>BLOCKED</td></tr>
+        <tr><td>v2</td><td>R07 changed to fire on a MISSING review, not just a dissent</td><td>An unreviewed proposal can no longer auto-execute; the reviewer stopped being decorative</td><td>BLOCKED</td></tr>
+        <tr><td>v3</td><td>A failing effect now writes a `failed` receipt before the error surfaces</td><td>An authorised action that was attempted never goes unrecorded</td><td>PASSED</td></tr>
       </tbody>
     </table>
-    <p class="lead" style="margin-top:1.2rem">{{PROOF_SOURCE}}</p>
+    <p class="lead" style="margin-top:1.2rem">npm test — 118 tests, no network and no credentials. Quote verification runs against SOURCE evidence only, so one agent cannot corroborate another by quoting it back.</p>
   </section>
 
   <!-- 5. WHAT'S NEXT + honest limit -->
   <section class="slide">
     <div class="eyebrow">What's next</div>
-    <h2>{{NEXT_HEADLINE}}</h2>
+    <h2>Deploy, then fix what the live site tells us</h2>
     <div class="grid">
-      <div class="card"><div class="n">Today</div><div class="l">{{TODAY}}</div></div>
-      <div class="card"><div class="n">Next</div><div class="l">{{NEXT}}</div></div>
-      <div class="card"><div class="n">Honest limit</div><div class="l">{{LIMIT}}</div></div>
+      <div class="card"><div class="n">Today</div><div class="l">19 November 2026</div></div>
+      <div class="card"><div class="n">Next</div><div class="l">First real install on a developer site, then the four first-contact risks named in docs/LIMITS.md: ADF parsing shifting the evidence digest, the JQL search shape, workflow transition names, and app-comment author identity — that last one silently disables the self-corroboration guard if it is wrong.</div></div>
+      <div class="card"><div class="n">Honest limit</div><div class="l">Not yet verified against a live Atlassian site. All 118 tests run against fakes at the Jira seam; forge lint validated the manifest, but no Jira REST call has executed and no Rovo conversation has happened. There is also no measured noise-reduction figure, because an honest one needs a real queue with real labels.</div></div>
     </div>
-    <p class="lead" style="margin-top:1.8rem">{{LIVE_URL}}</p>
+    <p class="lead" style="margin-top:1.8rem">Install link added at submission · github.com/Rizwankhalid675</p>
   </section>
 
 </div>
