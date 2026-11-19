@@ -1,123 +1,255 @@
-# codegeist-2026
+# Gatekeeper
 
 **Agentic incident triage for Jira Service Management: the model proposes, deterministic code decides, nothing executes without a receipt.**
 
-Built at codegeist-2026 · 2026-11-19 · Tracks: Apps for Software Teams + Best Agents (rovo:agent) + Best app with Atlassian MCP
+Built for **Codegeist 2026** · Category: **Apps for Software Teams** · Bonus: **Best Agents** (`rovo:agent`), **Best app with Atlassian MCP** (`rovo:mcp`)
 
-**Live:** _not deployed yet_ · **Demo:** [90-second walkthrough](#the-90-second-demo) · **Limits:** [what doesn't work yet](#honest-limits)
-
-![screenshot](docs/img/hero.png)
+**Install link:** _added at submission_ · **Demo video:** _added at submission_ · **Limits:** [what doesn't work yet](#honest-limits)
 
 ---
 
-## How codegeist-2026 meets the judging criteria
+## The problem, in one paragraph
 
-| Criterion | Points | How we meet it | Where to see it |
-|---|---:|---|---|
-| Technological Implementation | 20% | | §1 |
-| Design | 20% | | §2 |
-| Potential Impact | 20% | | §3 |
-| Innovation/Idea | 20% | | §4 |
-| Presentation | 20% | | §5 |
+A service desk does not have a detection problem. It has a volume problem. The obvious fix is
+to let a language model read the queue and act on it — and that is unacceptable the moment the
+queue belongs to someone else's production system. Gatekeeper is built the other way round: the
+agents are load-bearing and untrusted, and the authority to change anything sits in
+deterministic code that no model can influence.
 
-> Replace every cell with a specific, checkable claim and a link to where the judge can verify it.
-> If a cell says something vague like "great UX", you have lost those points already.
+Three trust levels, and they are the architecture:
 
----
-
-## 1. Technological Implementation (20% pts)
-
-### The problem, in numbers
-
-| Number | What it means | Source |
+| Layer | Trust | What it decides |
 |---|---|---|
-| | | |
-
-### Who it's for
-
-### Before and after
-
-| | Today | With codegeist-2026 |
-|---|---|---|
-| | | |
+| Correlation | deterministic, **fully trusted** | whether an alert deserves attention at all |
+| Agents (Rovo) | **untrusted**, load-bearing | what is wrong and what to do about it |
+| Policy gate + executor | deterministic, **fully trusted** | whether a robot may act, and then acting |
 
 ---
 
-## 2. Design (20% pts)
+## How Gatekeeper meets the judging criteria
 
-### Architecture
+| Criterion | How we meet it | Where to see it |
+|---|---|---|
+| Technological Implementation | Two Rovo agents with separated duties, an eleven-rule gate that is a pure function, an executor that re-derives its own authorisation, and a sha256 receipt chain. 118 tests, no Forge runtime needed to run them. | [`src/gate/gate.js`](src/gate/gate.js), [`src/executor.js`](src/executor.js), `npm test` |
+| Design | A finished product surface, not a proof of concept: the console shows the evidence, the agent handoff, **all eleven rules including the ones that passed**, and the receipt chain with its verification state. A project settings page where onboarding a team is authoring a rule pack. | [`src/frontend/console.jsx`](src/frontend/console.jsx), [`src/frontend/settings.jsx`](src/frontend/settings.jsx) |
+| Potential Impact | The failure mode this addresses is specific and current: teams are being asked to let agents act on production incidents, with "the model said so" as the audit trail. Gatekeeper is a shape for doing it that an administrator can actually sign off. | §1 below, [`docs/LIMITS.md`](docs/LIMITS.md) |
+| Innovation/Idea | The reviewer's citations are re-verified against **source evidence only**, so one agent cannot corroborate another by quoting it back. A fabricated citation is detected and holds the action. Most entries in this space ask you to trust the model more; this one is built to be trusted less. | [`verifyQuotes`](src/gate/evidence.js), rule R08 |
+| Presentation | One unbroken demo path, scripted beat by beat, with the fabricated-citation hold as the centrepiece. | [`VIDEO.md`](VIDEO.md), [`DEMO-RUNBOOK.md`](DEMO-RUNBOOK.md) |
 
-```mermaid
-flowchart LR
-  U[User] --> API[API]
-  API --> E[Deterministic check]
-  API --> L[LLM]
-  L --> E
-  E --> D[(Evidence store)]
+---
+
+## 1. What actually happens to one incident
+
+```
+Jira issue
+    │
+    ▼
+┌─────────────────────────────────────────────┐
+│ CORRELATION — deterministic, trusted        │  signature normalise, duplicate
+│ suppress with a written reason, or pass on  │  window, flap detect, maintenance
+└─────────────────────────────────────────────┘  window, known-benign list
+    │                                            no model is consulted here
+    ▼
+┌─────────────────────────────────────────────┐
+│ EVIDENCE BUNDLE  digest = sha256(canonical) │  every item flagged source: true/false
+└─────────────────────────────────────────────┘
+    │
+    ▼
+┌─────────────────────────────────────────────┐
+│ gatekeeper-agent      (rovo:agent)          │  proposes: rationale, confidence,
+│   → triage-incident                         │  an action id from the rule pack,
+└─────────────────────────────────────────────┘  and the quotes it relied on
+    │
+    ▼
+┌─────────────────────────────────────────────┐
+│ gatekeeper-reviewer   (rovo:agent)          │  separate prompt, separate module,
+│   → review-proposal                         │  blind to the proposer's confidence
+└─────────────────────────────────────────────┘
+    │
+    ▼
+┌─────────────────────────────────────────────┐
+│ POLICY GATE — 11 rules, pure function       │  R01-R03 reject · R04-R11 hold
+│ reject · hold · auto                        │  all eleven reported, every time
+└─────────────────────────────────────────────┘
+    │
+    ▼
+┌─────────────────────────────────────────────┐
+│ EXECUTOR — re-derives the verdict itself    │  a forged, stale or replayed
+│ five allow-listed effects, nothing else     │  verdict cannot cause an action
+└─────────────────────────────────────────────┘
+    │
+    ▼
+  sha256 receipt chain + a comment on the issue
 ```
 
-### Results
+### The eleven rules
 
-_Measured, with provenance. No adjectives._
+Three reject, eight hold. The gate can only ever make the outcome **more** conservative than
+the agent asked for — there is no input that escalates one.
 
-| Run | Metric | Value | How it was measured |
+| | Rule | Fires when | Forces |
 |---|---|---|---|
-| | | | |
+| R01 | Action exists in the rule pack | the agent named an action nobody authorised | reject |
+| R02 | Parameters are permitted values | the action is allowed but this value is not | reject |
+| R03 | Proposal matches the evidence we hold | the issue moved under the agent, or it is a replay | reject |
+| R04 | Project allows unattended action | the master switch is off | hold |
+| R05 | Action is cleared for unattended use | the admin capped this action at `hold` | hold |
+| R06 | Confidence at or above the floor | the model admitted uncertainty | hold |
+| R07 | Adversarial reviewer confirms | the reviewer dissented, **or nothing reviewed it** | hold |
+| R08 | Citations appear in source evidence | a quote was fabricated | hold |
+| R09 | Priority does not mandate a human | e.g. Highest always goes to a person | hold |
+| R10 | Action is reversible | the action cannot be undone | hold |
+| R11 | Not inside a maintenance window | planned work is in progress | hold |
 
-### The before/after progression
+Why R07 fires on a *missing* review and not just a dissent: passing an unreviewed proposal
+would make the reviewer decorative. The one case where review gets skipped is the case where
+nothing checked the proposal at all.
 
-| Version | What changed | Result |
+### The part that is genuinely different
+
+`quoteIsReal`, in three lines of consequence:
+
+```js
+const haystack = bundle.items
+  .filter((i) => i.source === true)   // ← source evidence ONLY
+  .map((i) => normaliseForQuoteMatch(i.text))
+  .join('\n');
+```
+
+The reviewer can see the diagnosis it is reviewing — it has to. So if quotes were matched
+against the whole bundle, a reviewer could "corroborate" a diagnosis by quoting that diagnosis
+back at itself. That is not corroboration. Agent-produced items, and Gatekeeper's own prior
+comments, are excluded from the haystack.
+
+The check is deliberately forgiving about formatting and completely unforgiving about content:
+whitespace, case and smart quotes are folded, so a reformatted real sentence passes; an invented
+one does not. And it is recomputed **inside the gate**, so a `quotesVerified: true` flag
+arriving from upstream changes nothing. There is a test named after exactly that:
+
+```
+✔ R08 recomputes the citation check and ignores the flag it was handed
+```
+
+### Why the executor does not trust its own verdict
+
+The verdict travels through storage and across invocations. So "a forged verdict cannot cause
+an action" has to be a property of the executor, not an assumption about the code before it.
+`execute()` re-runs the gate from the rule pack and the evidence, and acts only on its own
+conclusion. Four tests cover it:
+
+```
+✔ a FORGED verdict cannot cause an action
+✔ a verdict replayed against a newer rule pack is refused
+✔ a verdict about a stale view of the issue is refused
+✔ the executor refuses an action capped at hold even if a verdict says auto
+```
+
+---
+
+## 2. Multi-tenancy is not a field on a record
+
+A project **is** a rule pack. Onboarding a team is authoring one; it is not changing code.
+
+Two packs ship, with deliberately different postures, and they decide the same incident
+differently:
+
+| | northwind-msp | acme-retail |
 |---|---|---|
-| v1 | | |
-| v2 | | |
-| v3 | | |
+| unattended action | on | **off** |
+| confidence floor | 0.75 | 0.90 |
+| duplicate window | 60 min | 120 min |
+| always a human | Highest | Highest, High |
+
+```
+✔ the same incident is decided differently by two rule packs
+✔ a project with a higher confidence floor holds what a lower one allows
+```
+
+Load either from the project settings page to see it, with no code change.
+
+**The default for a new project is `unattendedAllowed: false`.** Installing Gatekeeper changes
+nothing about what happens to your incident queue until somebody deliberately turns it on. A
+stored rule pack that fails validation is **not** silently replaced with the default either —
+that would quietly change what the robot may do, and nobody would know which way.
 
 ---
 
-## 3. Potential Impact (20% pts)
+## 3. Sponsor technology, in detail
 
----
-
-## 4. Innovation/Idea (20% pts)
-
----
-
-## 5. Presentation (20%)
-
-See [VIDEO.md](../VIDEO.md) for the beat sheet.
-
----
-
-## Track requirements
-
-- **Forge platform + at least one Atlassian product:** how we satisfy it, and the file that proves it
-- **rovo:agent module for the Best Agents bonus:** how we satisfy it, and the file that proves it
-
-## Sponsor tech, in detail
-
-| Sponsor | What we use it for | Where in the code |
+| What | Where | Note |
 |---|---|---|
-| | | |
+| Forge | [`manifest.yml`](manifest.yml) | `nodejs22.x`, three scopes, nothing wider |
+| `rovo:agent` ×2 | `gatekeeper-agent`, `gatekeeper-reviewer` | separate prompts; the proposer is **not** wired to `review-proposal`, so it cannot clear its own R07 |
+| `action` ×6 | [`src/index.js`](src/index.js) | `triage-incident` and `review-proposal` are `CREATE`; the three read-only ones are `GET` |
+| `rovo:mcp` | `gatekeeper-mcp` | exposes **only** the three `GET` actions. An outside agent may inspect this project's policy; it can never act through it. There is a test that fails if a writing action is ever added. |
+| `jira:issuePanel` | [`console.jsx`](src/frontend/console.jsx) | UI Kit, `render: native` |
+| `jira:projectSettingsPage` | [`settings.jsx`](src/frontend/settings.jsx) | the rule pack editor |
+| Forge storage | [`src/platform/store.js`](src/platform/store.js) | rule packs, verdicts, receipts |
+| Jira REST v3 | [`src/platform/jira.js`](src/platform/jira.js) | the only module that talks to Jira, and the only five effects that exist |
+
+The agent prompts are worth reading as design artefacts rather than configuration:
+[`agent.md`](src/agent/prompts/agent.md) tells the proposer it has no authority and asks it not
+to offer to bypass the gate; [`reviewer.md`](src/agent/prompts/reviewer.md) tells the reviewer
+that confirming everything is worse than not reviewing at all.
 
 ---
 
-## The 90-second demo
+## 4. Tests
 
-| Step | Do | Watch for |
-|---|---|---|
-| 1 | | |
-| 2 | | |
-| 3 | | |
-| 4 | | |
+```bash
+npm test      # 118 tests, no Forge runtime, no network, no credentials
+```
+
+| File | Tests | Covers |
+|---|---:|---|
+| `tests/evidence.test.js` | 22 | canonical digests, correlation precedence, quote verification |
+| `tests/gate.test.js` | 26 | all eleven rules, precedence, determinism, malformed model output |
+| `tests/receipts.test.js` | 15 | the chain, and four distinct ways of tampering with it |
+| `tests/executor.test.js` | 14 | forged, stale and replayed verdicts; human override |
+| `tests/pipeline.test.js` | 24 | the two-agent handoff end to end, with Jira faked at the seam |
+| `tests/manifest.test.js` | 17 | the manifest cross-referenced against the code |
+
+`tests/manifest.test.js` exists because `forge lint` needs an Atlassian login and so cannot run
+on a fresh clone. It catches the class of mistake lint would not catch anyway — a
+`handler: index.triageIncidnet` that is valid YAML, passes lint, deploys, and breaks the first
+time a judge uses it.
+
+Note the test invocation is `node --test tests/*.test.js`, not `node --test tests/`. The second
+form silently runs **zero** tests on some Node versions.
+
+---
+
+## 5. Presentation
+
+See [`VIDEO.md`](VIDEO.md) for the beat sheet and [`DEMO-RUNBOOK.md`](DEMO-RUNBOOK.md) for the
+rehearsal script. The centrepiece is the fabricated-citation hold: the reviewer says "confirm"
+and offers a quote to justify it, R08 finds the quote is not in the evidence, and the action is
+held for a human — on screen, with the receipt.
+
+---
 
 ## Run it
 
 ```bash
-./scripts/demo-up.sh       # one command, everything up
-./scripts/demo-status.sh   # health
-./scripts/demo-reset.sh    # back to a pristine demo state
-./scripts/demo-down.sh
+npm install
+npm test
 ```
+
+To deploy it you need a free Atlassian Cloud developer site and the Forge CLI:
+
+```bash
+npm install -g @forge/cli
+```
+
+```bash
+forge login
+```
+
+```bash
+forge register && forge deploy && forge install
+```
+
+`forge register` writes the real `app.id` into `manifest.yml`, replacing the placeholder.
 
 ## For AI agents
 
@@ -125,31 +257,32 @@ Start with [`AGENTS.md`](AGENTS.md).
 
 | Need | Where |
 |---|---|
-| Contracts and shared types | `contracts.ts` |
-| Entry point | |
-| Deterministic checks | |
-| Demo seed data | `demo/seed/` |
-
-## Repo map
-
-```
-contracts.ts     frozen types and API shapes
-src/             application code
-demo/            seed data + runbook
-scripts/         demo + preflight tooling
-docs/            architecture, screenshots
-```
+| Contracts and shared types | [`src/shared/contracts.js`](src/shared/contracts.js) — frozen |
+| The eleven rules | [`src/gate/gate.js`](src/gate/gate.js) |
+| Quote verification | [`src/gate/evidence.js`](src/gate/evidence.js) |
+| The only code that writes to Jira | [`src/platform/jira.js`](src/platform/jira.js) |
+| Forge entry point (wiring only) | [`src/index.js`](src/index.js) |
 
 ---
 
 ## Honest limits
 
-_Name your own weaknesses here, before a judge finds them. This section wins points._
+Named here before a judge finds them. See [`docs/LIMITS.md`](docs/LIMITS.md) for the full list.
 
-- **What is simulated:**
-- **Sample size:**
-- **What we did not build:**
-- **Where it would break in production:**
-
-## Sources
-
+- **Not yet run against a live Atlassian site.** Every one of the 118 tests runs against fakes
+  at the Jira seam. `forge lint` validated the manifest's structure and resources, but full
+  lint, `forge deploy` and a real Rovo conversation all need an Atlassian login, which has not
+  happened yet. Experience says the first live run finds things no local test can — so treat
+  the Jira integration as unverified until it has.
+- **Forge storage has no compare-and-swap.** Two concurrent appends to one issue's receipt
+  chain could collide and produce a duplicate sequence number. `verifyChain` detects the damage;
+  it cannot prevent it.
+- **The confidence floor is a floor on a self-reported number.** It catches a model that admits
+  uncertainty and does nothing about one that is confidently wrong. R07 and R08 are what cover
+  that case, which is why the floor is not the safety story on its own.
+- **The reviewer is a separate agent, not an independent one.** It has a different prompt, a
+  different module key, and is not wired to the proposing action — so it cannot clear its own
+  R07. It is still the same underlying model, and a shared blind spot would defeat both.
+- **No measured noise-reduction figure yet.** The correlation logic is tested for correctness on
+  constructed cases. A percentage would need a real queue, and inventing one would be exactly
+  the kind of unfalsifiable claim this project argues against.

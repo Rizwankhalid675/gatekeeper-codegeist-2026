@@ -1,4 +1,4 @@
-.runtime/
 node_modules/
+.runtime/
 .env
 *.log

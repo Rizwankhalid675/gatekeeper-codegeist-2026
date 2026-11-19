@@ -9,7 +9,10 @@ You own one lane. Edit only the files in your lane's area.
 
 | Lane | Owner | File area | Status |
 |---|---|---|---|
-| contracts | integrator | `contracts.ts`, `src/shared/**` | frozen |
+| contracts | integrator | `src/shared/contracts.js` | frozen |
+| gate      | integrator | `src/gate/**`, `src/executor.js` | frozen — 118 tests depend on it |
+| forge     | integrator | `manifest.yml`, `src/index.js`, `src/platform/**` | open |
+| frontend  | —          | `src/frontend/**` | open |
 | _add lanes here_ | | | |
 
 If your work seems to require a file outside your area: **stop and report it**.
@@ -17,7 +20,7 @@ Do not "just quickly" fix it. That is how two agents overwrite each other.
 
 ## 2. Contracts are read-only
 
-`contracts.ts` defines every type and API shape. Import from it. Never edit it.
+`src/shared/contracts.js` defines every type and API shape. Import from it. Never edit it.
 Need a change? Ask the integrator, who makes it once and tells everyone.
 
 ## 3. Branches
@@ -29,7 +32,7 @@ Need a change? Ask the integrator, who makes it once and tells everyone.
 ## 4. Before you hand off
 
 ```bash
-npm run typecheck && npm test && npm run build
+npm test && npx forge lint
 ```
 
 A lane that does not build does not land.

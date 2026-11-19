@@ -1,0 +1,261 @@
+modules:
+  # ---------------------------------------------------------------------------
+  # The Rovo agent. UNTRUSTED by design: it reasons, it proposes, and every
+  # action it names goes through the deterministic gate before anything happens.
+  # The prompt says so explicitly, because an agent told it has authority will
+  # behave as though it does.
+  # ---------------------------------------------------------------------------
+  rovo:agent:
+    - key: gatekeeper-agent
+      name: Gatekeeper
+      description: >-
+        Triages incidents in this project. Proposes a diagnosis and a remediation
+        drawn only from the actions an admin authorised, then shows you the
+        deterministic verdict and the receipt.
+      prompt: resource:prompts;agent.md
+      conversationStarters:
+        - Triage NW-101 and show me the verdict
+        - Why was the last action on this issue held?
+        - Show me the receipt chain for this issue
+        - What is this project allowed to do unattended?
+      actions:
+        - triage-incident
+        - explain-verdict
+        - read-receipts
+        - describe-rulepack
+
+    # The adversarial reviewer is a SEPARATE agent with a separate prompt, and it
+    # is the only one wired to review-proposal. The proposing agent cannot clear
+    # its own R07, because the gate holds any proposal with no review on the
+    # record and this is the only action that puts one there.
+    - key: gatekeeper-reviewer
+      name: Gatekeeper Reviewer
+      description: >-
+        Reviews a proposal Gatekeeper has made, adversarially. Looks for reasons
+        the proposed action is wrong, and must cite the evidence it relies on.
+      prompt: resource:prompts;reviewer.md
+      conversationStarters:
+        - Review the proposal on NW-101
+        - Is there any reason not to take the proposed action?
+      actions:
+        - review-proposal
+        - read-receipts
+
+  # ---------------------------------------------------------------------------
+  # Actions. `triage-incident` is CREATE because it can change the issue; the
+  # other three are GET and read nothing but stored state. The verbs matter:
+  # Atlassian automation will not invoke CREATE/UPDATE/DELETE actions, so the
+  # read-only three stay usable from an automation rule while the one that can
+  # act requires a person in the conversation.
+  # ---------------------------------------------------------------------------
+  action:
+    - key: triage-incident
+      name: Triage an incident
+      function: triageIncident
+      actionVerb: CREATE
+      description: >-
+        Run the full Gatekeeper pipeline on one Jira issue: gather evidence,
+        correlate it against recent issues, propose a remediation, review it
+        adversarially, run the eleven-rule policy gate, and either execute the
+        action or hold it for a human. Always writes a receipt.
+      inputs:
+        issueKey:
+          title: Issue key
+          type: string
+          required: true
+          description: The Jira issue to triage, for example NW-101.
+        rationale:
+          title: Rationale
+          type: string
+          required: true
+          description: >-
+            Why you believe this is the right action, in your own words. Required
+            even when you propose no action.
+        confidence:
+          title: Confidence
+          type: number
+          required: true
+          description: >-
+            Your confidence between 0 and 1. Report it honestly, including when
+            it is low. A value outside the range is refused, not clipped.
+        actionId:
+          title: Action id
+          type: string
+          required: false
+          description: >-
+            The id of an action in this project's rule pack. Call
+            describe-rulepack if unsure. An id that is not in the pack is
+            rejected by rule R01. Omit it to record a diagnosis with no action.
+        params:
+          title: Action parameters
+          type: string
+          required: false
+          description: >-
+            A JSON object of parameters for the action, for example
+            {"body":"..."} for a comment or {"label":"gatekeeper-incident"} for a
+            label. Malformed JSON is refused.
+        quotes:
+          title: Supporting quotes
+          type: string
+          required: false
+          description: >-
+            Verbatim lines from the evidence you relied on, one per line. Every
+            quote is checked against the source evidence; a quote that is not
+            there holds the action under rule R08. Cite nothing rather than
+            paraphrasing.
+
+    - key: review-proposal
+      name: Review a proposal
+      function: reviewProposal
+      actionVerb: CREATE
+      description: >-
+        Record an adversarial review of the proposal on an issue, then re-run the
+        policy gate. Nothing runs unattended until a review is on the record.
+      inputs:
+        issueKey:
+          title: Issue key
+          type: string
+          required: true
+          description: The Jira issue whose proposal you are reviewing.
+        verdict:
+          title: Verdict
+          type: string
+          required: true
+          description: Exactly "confirm" or "dissent". Anything else is refused.
+        rationale:
+          title: Rationale
+          type: string
+          required: true
+          description: Why you confirm or dissent.
+        quotes:
+          title: Supporting quotes
+          type: string
+          required: false
+          description: >-
+            Verbatim lines from the SOURCE evidence that support your verdict, one
+            per line. These are re-verified by deterministic code against source
+            evidence only — another agent's output does not count as
+            corroboration. A fabricated citation holds the action under R08.
+
+    - key: explain-verdict
+      name: Explain the last verdict
+      function: explainVerdict
+      actionVerb: GET
+      description: >-
+        Explain why Gatekeeper reached its last decision on an issue, rule by
+        rule, including the rules that passed.
+      inputs:
+        issueKey:
+          title: Issue key
+          type: string
+          required: true
+          description: The Jira issue to explain, for example NW-101.
+
+    - key: read-receipts
+      name: Read the receipt chain
+      function: readReceipts
+      actionVerb: GET
+      description: >-
+        Return the append-only receipt chain for an issue and whether it
+        verifies, so an auditor can see every decision and confirm none has been
+        edited.
+      inputs:
+        issueKey:
+          title: Issue key
+          type: string
+          required: true
+          description: The Jira issue whose history to read.
+
+    - key: describe-rulepack
+      name: Describe what this project permits
+      function: describeRulePack
+      actionVerb: GET
+      description: >-
+        Return the project's rule pack: which actions exist, which may run
+        unattended, the confidence floor, and whether unattended action is
+        switched on at all.
+      inputs:
+        projectKey:
+          title: Project key
+          type: string
+          required: true
+          description: The Jira project, for example NW.
+
+  # ---------------------------------------------------------------------------
+  # The same read-only actions, exposed as MCP tools so a third-party agent can
+  # ask this project's gate what it permits without being able to act.
+  # `triage-incident` is deliberately NOT in this list: an outside agent may
+  # inspect the policy, never execute through it.
+  # ---------------------------------------------------------------------------
+  rovo:mcp:
+    - key: gatekeeper-mcp
+      name: Gatekeeper policy
+      tools:
+        - explain-verdict
+        - read-receipts
+        - describe-rulepack
+
+  # ---------------------------------------------------------------------------
+  # The operator console: evidence, agent handoff, the gate's reasons and the
+  # receipt, on one page, per incident.
+  # ---------------------------------------------------------------------------
+  jira:issuePanel:
+    - key: gatekeeper-panel
+      resource: console
+      resolver:
+        function: resolver
+      render: native
+      title: Gatekeeper
+      icon: resource:icons;gatekeeper.svg
+      viewportSize: large
+
+  # The rule pack editor. Project-scoped, because a rule pack is per project.
+  jira:projectSettingsPage:
+    - key: gatekeeper-settings
+      resource: settings
+      resolver:
+        function: resolver
+      render: native
+      title: Gatekeeper rules
+
+  function:
+    - key: triageIncident
+      handler: index.triageIncident
+    - key: reviewProposal
+      handler: index.reviewProposal
+    - key: explainVerdict
+      handler: index.explainVerdict
+    - key: readReceipts
+      handler: index.readReceipts
+    - key: describeRulePack
+      handler: index.describeRulePack
+    - key: resolver
+      handler: index.handler
+
+resources:
+  - key: console
+    path: src/frontend/console.jsx
+  - key: settings
+    path: src/frontend/settings.jsx
+  - key: prompts
+    path: src/agent/prompts
+  - key: icons
+    path: src/frontend/icons
+
+app:
+  runtime:
+    name: nodejs22.x
+  # Replaced by `forge register`. Left as a placeholder so the manifest is
+  # readable in the repo; `forge lint` and `forge deploy` need the real one.
+  id: ari:cloud:ecosystem::app/00000000-0000-0000-0000-000000000000
+
+permissions:
+  scopes:
+    # Read issues, comments, changelogs and links to build the evidence bundle.
+    - read:jira-work
+    # Comment, label, transition, link and assign — the five effects the
+    # executor implements. Nothing here grants anything the effect map does not
+    # expose, and the effect map is the only path from an agent to Jira.
+    - write:jira-work
+    # Rule packs, verdicts and the receipt chain.
+    - storage:app
