@@ -275,6 +275,19 @@ export const RECEIPT_EVENT = {
    * where an operator most needs to know what was tried.
    */
   FAILED: 'failed',
+  /**
+   * An administrator changed the rule pack.
+   *
+   * Gatekeeper recorded every action a robot took and nothing about the person
+   * who decided what robots were allowed to do — which is the more consequential
+   * of the two. Switching unattended action on, or lowering the confidence
+   * floor, changes the behaviour of every future decision in the project, and it
+   * left no trace beyond a version number going up.
+   *
+   * These receipts live on a chain of their own, keyed by project rather than by
+   * issue, and they are verified by the same `verifyChain`.
+   */
+  RULEPACK_CHANGED: 'rulepack-changed',
 };
 
 // ---------------------------------------------------------------------------
@@ -283,6 +296,12 @@ export const RECEIPT_EVENT = {
 
 export const KEY = {
   rulePack: (projectKey) => `rulepack:${projectKey}`,
+  /**
+   * The subject of the rule pack's own receipt chain. Receipt keys live in the
+   * `receipt:` namespace, so this never collides with `rulePack` above — the
+   * chain for project NW is `receipt:rulepack:NW:000000`.
+   */
+  rulePackChain: (projectKey) => `rulepack:${projectKey}`,
   receiptHead: (issueKey) => `receipt-head:${issueKey}`,
   receipt: (issueKey, seq) => `receipt:${issueKey}:${seq}`,
   verdict: (issueKey) => `verdict:${issueKey}`,

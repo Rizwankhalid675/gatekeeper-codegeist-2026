@@ -43,7 +43,7 @@ Three trust levels, and they are the architecture:
 
 | Criterion | How we meet it | Where to see it |
 |---|---|---|
-| Technological Implementation | Two Rovo agents with separated duties, a twelve-rule gate that is a pure function, an executor that re-derives its own authorisation, and a sha256 receipt chain. 150 tests, no Forge runtime needed to run them. | [`src/gate/gate.js`](src/gate/gate.js), [`src/executor.js`](src/executor.js), `npm test` |
+| Technological Implementation | Two Rovo agents with separated duties, a twelve-rule gate that is a pure function, an executor that re-derives its own authorisation, and a sha256 receipt chain. 169 tests, no Forge runtime needed to run them. | [`src/gate/gate.js`](src/gate/gate.js), [`src/executor.js`](src/executor.js), `npm test` |
 | Design | A finished product surface, not a proof of concept: the console shows the evidence, the agent handoff, **all twelve rules including the ones that passed**, and the receipt chain with its verification state. A project settings page where onboarding a team is authoring a rule pack. | [`src/frontend/console.jsx`](src/frontend/console.jsx), [`src/frontend/settings.jsx`](src/frontend/settings.jsx) |
 | Potential Impact | The failure mode this addresses is specific and current: teams are being asked to let agents act on production incidents, with "the model said so" as the audit trail. Gatekeeper is a shape for doing it that an administrator can actually sign off. | §1 below, [`docs/LIMITS.md`](docs/LIMITS.md) |
 | Innovation/Idea | The reviewer's citations are re-verified against **source evidence only**, so one agent cannot corroborate another by quoting it back. A fabricated citation is detected and holds the action. Most entries in this space ask you to trust the model more; this one is built to be trusted less. | [`verifyQuotes`](src/gate/evidence.js), rule R08 |
@@ -128,6 +128,29 @@ reads wrong costs the whole point of having one.
 R08 and R12 are the same check pointed at the two different agents. R08 came first and left
 the obvious hole: it verified the reviewer's citations and took the proposer's on trust, which
 is backwards — the proposer is the one asking for an effect on a real issue.
+
+### The rule pack has receipts too
+
+Gatekeeper recorded every action a robot took and nothing about the person who
+decided what robots may do — which is the more consequential of the two.
+Switching unattended action on changes the behaviour of every future decision in
+the project.
+
+Every rule pack change now writes a receipt to the **project's own sha256
+chain**, naming the accountId, the version, and what changed. The receipt's
+digest field is the digest of the pack itself, so a change record is tied to an
+exact set of rules rather than merely asserting that a save happened.
+
+The diff says whether a change **widens** what a robot may do, because that is
+the only question anyone asks six months later. The case that makes it worth
+writing carefully: clearing an action's permitted values looks like a reduction
+(`3 values → 0`) and is in fact the widest change available on an action, since
+an empty list means ANY value.
+
+Saves carry the version they were made against, so two administrators in two
+tabs cannot silently overwrite each other — the second save is refused and shown
+the current rules. Forge storage has no compare-and-swap, so this is a check
+rather than a guarantee; `docs/LIMITS.md` says so.
 
 ### The part that is genuinely different
 
@@ -226,7 +249,7 @@ that confirming everything is worse than not reviewing at all.
 ## 4. Tests
 
 ```bash
-npm test      # 150 tests, no Forge runtime, no network, no credentials
+npm test      # 169 tests, no Forge runtime, no network, no credentials
 ```
 
 | File | Tests | Covers |
@@ -237,8 +260,8 @@ npm test      # 150 tests, no Forge runtime, no network, no credentials
 | `tests/executor.test.js` | 14 | forged, stale and replayed verdicts; human override |
 | `tests/pipeline.test.js` | 24 | the two-agent handoff end to end, with Jira faked at the seam |
 | `tests/manifest.test.js` | 18 | the manifest cross-referenced against the code |
-| `tests/rulepack.test.js` | 12 | what an administrator is allowed to author, refused at save time |
-| `tests/frontend.test.js` | 9 | the static checks for the three ways this panel rendered blank |
+| `tests/rulepack.test.js` | 29 | what an administrator may author, and who changed the rules |
+| `tests/frontend.test.js` | 11 | the static checks for the ways this panel rendered wrong |
 
 `tests/manifest.test.js` exists because `forge lint` needs an Atlassian login and so cannot run
 on a fresh clone. It catches the class of mistake lint would not catch anyway — a
@@ -309,7 +332,7 @@ Named here before a judge finds them. See [`docs/LIMITS.md`](docs/LIMITS.md) for
   development environment with `forge lint` reporting no issues, which rules out a class of
   structural problem. It rules out nothing about Jira: not one request in
   `src/platform/jira.js` has ever executed, and no Rovo conversation has happened. Every one of
-  the 150 tests runs against fakes at the Jira seam. Experience says the first live run finds
+  the 169 tests runs against fakes at the Jira seam. Experience says the first live run finds
   things no local test can.
 - **Forge storage has no compare-and-swap.** Two concurrent appends to one issue's receipt
   chain could collide and produce a duplicate sequence number. `verifyChain` detects the damage;

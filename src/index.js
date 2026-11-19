@@ -36,7 +36,7 @@ import {
   fetchRecentIssues,
   forgeEffects,
 } from './platform/jira.js';
-import { loadRulePack, saveRulePack, demoRulePacks } from './gate/rulepack.js';
+import { commitRulePack, loadRulePack, readRulePackHistory, demoRulePacks } from './gate/rulepack.js';
 import { readChain, verifyChain } from './gate/receipts.js';
 import { overrideAndExecute } from './executor.js';
 import {
@@ -229,16 +229,37 @@ resolver.define('getRulePack', async ({ context, payload }) => {
   return guard(async () => ({ ok: true, rulePack: await loadRulePack(forgeStore, projectKey) }), 'load the rule pack');
 });
 
-resolver.define('saveRulePack', async ({ payload }) => {
+resolver.define('saveRulePack', async ({ context, payload }) => {
   if (!payload?.rulePack) return { ok: false, error: 'No rule pack supplied.' };
+
+  // Who. An administrator loosening the gate is the most consequential act in
+  // this product, and until now it was the only one that left no name.
+  const actor = context?.accountId ? `user:${context.accountId}` : 'user:unknown';
+
+  try {
+    const result = await commitRulePack(forgeStore, {
+      pack: payload.rulePack,
+      basedOnVersion: typeof payload.basedOnVersion === 'number' ? payload.basedOnVersion : undefined,
+      actor,
+      now: new Date().toISOString(),
+    });
+    return { ok: true, rulePack: result.rulePack, changes: result.changes, unchanged: result.changes.length === 0 };
+  } catch (e) {
+    console.error('[gatekeeper] save the rule pack failed', e);
+    // A conflict is not an error the user caused and it is recoverable, so it
+    // comes back with the current pack rather than only a message.
+    if (e.conflict) return { ok: false, conflict: true, error: e.message, rulePack: e.current };
+    return { ok: false, error: `save the rule pack failed: ${e.message}` };
+  }
+});
+
+resolver.define('getRulePackHistory', async ({ context, payload }) => {
+  const projectKey = payload?.projectKey || context?.extension?.project?.key;
+  if (!projectKey) return { ok: false, error: 'No project in context.' };
   return guard(async () => {
-    const current = await loadRulePack(forgeStore, payload.rulePack.projectKey);
-    // Bumping the version on every save is what makes a stored verdict from
-    // before the change detectably stale, so an older verdict cannot be
-    // executed under rules that have since been tightened.
-    const next = { ...payload.rulePack, version: current.version + 1 };
-    return { ok: true, rulePack: await saveRulePack(forgeStore, next) };
-  }, 'save the rule pack');
+    const { chain, verification } = await readRulePackHistory(forgeStore, projectKey);
+    return { ok: true, chain, verification };
+  }, 'read the rule pack history');
 });
 
 /**
@@ -255,9 +276,19 @@ resolver.define('loadDemoRulePack', async ({ context, payload }) => {
 
   return guard(async () => {
     const packs = demoRulePacks();
-    const current = await loadRulePack(forgeStore, projectKey);
-    const next = { ...packs[which], projectKey, version: current.version + 1 };
-    return { ok: true, rulePack: await saveRulePack(forgeStore, next) };
+    // Routed through commitRulePack, not saveRulePack: loading the northwind
+    // pack switches unattended action ON for the project. That is the single
+    // largest widening available anywhere in this product, and it would be
+    // perverse for the convenience button to be the one path that leaves no
+    // record of who pressed it.
+    //
+    // No basedOnVersion: this is a deliberate overwrite of whatever is there.
+    const result = await commitRulePack(forgeStore, {
+      pack: { ...packs[which], projectKey },
+      actor: context?.accountId ? `user:${context.accountId}` : 'user:unknown',
+      now: new Date().toISOString(),
+    });
+    return { ok: true, rulePack: result.rulePack, changes: result.changes };
   }, 'load the demo rule pack');
 });
 

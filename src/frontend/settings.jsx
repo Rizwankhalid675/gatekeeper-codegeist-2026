@@ -62,6 +62,7 @@ const App = () => {
   const [newTitle, setNewTitle] = useState('');
   const [newEffect, setNewEffect] = useState('comment');
   const [formKey, setFormKey] = useState(0);
+  const [history, setHistory] = useState(null);
 
   const safeInvoke = (name, payload) =>
     invoke(name, payload).catch((e) => ({
@@ -69,12 +70,18 @@ const App = () => {
       error: `The Gatekeeper resolver did not respond: ${e?.message || e}`,
     }));
 
+  const loadHistory = async (key) => {
+    const h = await safeInvoke('getRulePackHistory', key ? { projectKey: key } : {});
+    setHistory(h.ok ? h : null);
+  };
+
   const load = async (key) => {
     const r = await safeInvoke('getRulePack', key ? { projectKey: key } : {});
     if (r.ok) {
       setPack(r.rulePack);
       setProjectKey(r.rulePack.projectKey);
       setError(null);
+      await loadHistory(r.rulePack.projectKey);
     } else {
       setError(r.error);
     }
@@ -135,19 +142,47 @@ const App = () => {
   const save = async (next) => {
     setBusy(true);
     setNotice(null);
-    const r = await safeInvoke('saveRulePack', { rulePack: next });
+    // `basedOnVersion` is what makes a lost update detectable. Without it, two
+    // administrators in two tabs each save the pack they loaded and the second
+    // silently discards the first — including, say, a tightening somebody made
+    // in response to an incident.
+    const r = await safeInvoke('saveRulePack', { rulePack: next, basedOnVersion: pack.version });
     setBusy(false);
-    if (r.ok) {
-      setPack(r.rulePack);
-      setNotice({
-        appearance: 'success',
-        // Saying the version moved matters: it is what makes any verdict decided
-        // under the old rules detectably stale instead of silently executable.
-        text: `Saved as v${r.rulePack.version}. Any verdict decided under v${r.rulePack.version - 1} is now stale and cannot be executed.`,
-      });
-    } else {
+
+    if (r.conflict) {
+      // Show them what is actually stored now, rather than leaving the screen
+      // displaying a pack that no longer exists.
+      if (r.rulePack) setPack(r.rulePack);
+      await loadHistory(pack.projectKey);
       setNotice({ appearance: 'error', text: r.error });
+      return;
     }
+    if (!r.ok) {
+      setNotice({ appearance: 'error', text: r.error });
+      return;
+    }
+
+    setPack(r.rulePack);
+    await loadHistory(r.rulePack.projectKey);
+
+    if (r.unchanged) {
+      // A version bump makes every pending verdict stale, so it is not spent on
+      // a save that changed nothing.
+      setNotice({ appearance: 'information', text: 'Nothing changed, so nothing was saved and the version did not move.' });
+      return;
+    }
+
+    const widened = (r.changes || []).filter((c) => c.widens);
+    setNotice({
+      appearance: widened.length > 0 ? 'warning' : 'success',
+      // Saying the version moved matters: it is what makes any verdict decided
+      // under the old rules detectably stale instead of silently executable.
+      // Saying what WIDENED matters more — that is the change somebody will ask
+      // about later.
+      text:
+        `Saved as v${r.rulePack.version}. Any verdict decided under v${r.rulePack.version - 1} is now stale and cannot be executed.` +
+        (widened.length > 0 ? ` This widens what a robot may do: ${widened.map((c) => c.text).join('; ')}.` : ''),
+    });
   };
 
   const loadDemo = async (which) => {
@@ -157,6 +192,7 @@ const App = () => {
     setBusy(false);
     if (r.ok) {
       setPack(r.rulePack);
+      await loadHistory(r.rulePack.projectKey);
       setNotice({ appearance: 'success', text: `Loaded the ${which} demo pack as v${r.rulePack.version}.` });
     } else {
       setNotice({ appearance: 'error', text: r.error });
@@ -449,6 +485,61 @@ const App = () => {
             the quickest way to find the right values — but it finds them at execution time, not here.
           </Text>
         </SectionMessage>
+      </Stack>
+
+      {/* The rule pack has receipts of its own. Gatekeeper recorded every
+          action a robot took and nothing about the person who decided what
+          robots may do, which is the more consequential of the two. */}
+      <Stack space="space.100">
+        <Heading as="h4">Who changed these rules</Heading>
+        {!history ? (
+          <Text>
+            <Em>History unavailable.</Em>
+          </Text>
+        ) : history.chain.length === 0 ? (
+          <Text>
+            <Em>No changes recorded yet. Every save from here on is written to a chained, tamper-evident record.</Em>
+          </Text>
+        ) : (
+          <Stack space="space.100">
+            <Text>
+              {history.verification?.ok ? (
+                <Lozenge appearance="success">Chain verified — {history.chain.length} change(s)</Lozenge>
+              ) : (
+                <Lozenge appearance="removed">
+                  Chain BROKEN at {history.verification?.at}: {history.verification?.problem}
+                </Lozenge>
+              )}
+            </Text>
+            {history.chain.map((r) => (
+              <Stack key={r.digest} space="space.025">
+                <Inline space="space.100" alignBlock="center">
+                  <Lozenge appearance={/WIDENS/.test(r.reason) ? 'moved' : 'default'}>
+                    {/WIDENS/.test(r.reason) ? 'widened' : 'changed'}
+                  </Lozenge>
+                  <Text>
+                    <Strong>v{r.rulePackVersion}</Strong>
+                  </Text>
+                  <Code>{r.actor}</Code>
+                  <Text>{r.at}</Text>
+                </Inline>
+                <Text>{r.reason}</Text>
+                <Text>
+                  <Em>
+                    rules <Code>{r.evidenceDigest.slice(0, 12)}</Code> · receipt <Code>{r.digest.slice(0, 12)}</Code>{' '}
+                    (prev <Code>{r.prev.slice(0, 12)}</Code>)
+                  </Em>
+                </Text>
+              </Stack>
+            ))}
+          </Stack>
+        )}
+        <Text>
+          <Em>
+            Every change is chained by sha256 the same way an incident's receipts are. Editing an earlier entry breaks
+            the verification above rather than quietly rewriting what happened.
+          </Em>
+        </Text>
       </Stack>
 
       <Stack space="space.100">

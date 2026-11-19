@@ -81,6 +81,8 @@ Capture **tab-scoped only** — never a full desktop. Each of these is a separat
 - [ ] The reviewer confirming, then `auto` + executed
 - [ ] The receipt chain with `held` / `failed` rows and `Chain verified`
 - [ ] Unattended toggled off, same incident, different verdict
+- [ ] The rule pack change history, chain verified, with a `widened` entry
+- [ ] The lost-update refusal: two tabs, the second one refused
 - [ ] `docs/LIMITS.md`
 
 ## Recording rules that save the take
@@ -89,7 +91,9 @@ Capture **tab-scoped only** — never a full desktop. Each of these is a separat
   a clean take needs issues Gatekeeper has not touched, or the panel tells a story the
   narration doesn't match.
 - Hide notifications, other tabs, bookmarks and your email. The Jira site shows your
-  name and address in several places — check every frame.
+  name and address in several places — check every frame. The new **Who changed
+  these rules** section prints raw accountIds; they are opaque rather than personal,
+  but decide deliberately whether they are in shot.
 - Zoom to ~125%. Judges watch on laptops.
 - Never narrate a spinner. Rovo takes 20–40 seconds to answer; cut every one of those.
 - Three takes. The third is the good one.

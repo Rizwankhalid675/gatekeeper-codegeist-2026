@@ -154,6 +154,53 @@ Removing every action is allowed and leaves a legitimate posture: Gatekeeper
 still correlates, diagnoses and holds, and R01 refuses every action proposed.
 The editor says so on screen rather than looking broken.
 
+### RESOLVED: the rule pack has receipts too
+
+Two gaps, both in the same place, and both embarrassing for a product whose
+thesis is that nothing happens without a record:
+
+1. **Gatekeeper recorded every action a robot took and nothing about the person
+   who decided what robots may do.** Switching unattended action on, or lowering
+   the confidence floor, changes the behaviour of every future decision in the
+   project. It left no trace beyond a version number going up.
+2. **Two administrators editing at once lost one of the two changes silently.**
+   The editor wrote the whole pack on every change, so the second save
+   overwrote the first — including, in the case that matters, a tightening
+   somebody made in response to an incident.
+
+Both are closed:
+
+- Every rule pack change is now a receipt on the **project's own sha256 chain**,
+  keyed `rulepack:<PROJECT>` and verified by the same `verifyChain` the incident
+  receipts use. It names the accountId, the version, and what changed.
+- The receipt's `evidenceDigest` is the **digest of the pack itself**, computed
+  without the version, so a change record is tied to an exact set of rules
+  rather than merely asserting that a save happened.
+- Saves carry `basedOnVersion`. If storage has moved on, the save is **refused**
+  and the current pack is handed back to the editor to display.
+- A save that changes no rule is refused rather than written, because a version
+  bump makes every pending verdict stale and spending that on a no-op costs a
+  human a re-run for nothing.
+
+**The diff says whether a change WIDENS what a robot may do**, and that
+asymmetry is the point. Tightening needs no scrutiny; loosening changes every
+future decision, and six months later the only question anyone asks is who
+turned it on. The subtle case the tests pin down: clearing an action's permitted
+values looks like a reduction (`3 values → 0`) and is in fact the widest change
+available on an action, because an empty list means ANY value. A diff that
+reported that as a tightening would tell an auditor the exact opposite of what
+happened.
+
+Loading a demo pack goes through the same path. It is the convenience button
+that switches unattended action ON, so it would be perverse for it to be the one
+route that leaves no record of who pressed it.
+
+Still true, and still in the honest-limits column: Forge storage has **no
+compare-and-swap**, so `basedOnVersion` is a check and not a guarantee. Two saves
+landing in the same instant can still interleave. It closes the case that
+actually happens — two tabs, one opened before the other saved — and the chain
+would show the result either way.
+
 ### RESOLVED: the proposer's citations are verified too (rule R12)
 
 The gap, for the record: R08 checked `review.quotes` only. The proposing agent's
@@ -384,11 +431,10 @@ generator rather than the system.
   no external systems, no Systems Manager equivalent. The allow-list is the
   safety property, so widening it is a code-review decision rather than
   configuration.
-- **No rule pack import/export or audit log of pack changes.** The version
-  number increments on save, which is enough to make an older verdict detectably
-  stale, but there is no record of *who* changed what.
-- **The project settings page writes the whole pack on every change.** Two
-  administrators editing at once would have the last write win silently.
+- **No rule pack import/export.** The pack is authored in the editor or loaded
+  from one of the two demo packs; there is no way to move one between sites.
+  (The *audit log* gap that used to be in this line is closed — see "The rule
+  pack has receipts too" above.)
 
 ## Things that are true but easy to overstate
 
