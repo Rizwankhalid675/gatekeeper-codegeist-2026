@@ -242,7 +242,12 @@ npm install
 npm test
 ```
 
-To deploy it you need a free Atlassian Cloud developer site and the Forge CLI:
+**The site must have Rovo.** A free Atlassian developer site does not have it — Rovo is
+Standard, Premium and Enterprise only — so the two agents will simply not appear, however
+cleanly the app installs. Use a Forge demo site (`forge site provision`), which ships
+enterprise Jira, Confluence, JSM and Rovo.
+
+To deploy it you need a Rovo-enabled site and the Forge CLI:
 
 ```bash
 npm install -g @forge/cli

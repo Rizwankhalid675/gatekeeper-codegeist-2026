@@ -25,6 +25,29 @@ This is the part the rules are explicit about: *"Detailed instructions must be
 provided for all configuration steps that must be taken."* Rehearse it on a Jira
 site that has never seen the app.
 
+### READ THIS FIRST: the site must have Rovo
+
+**Gatekeeper's two agents do not appear on a free Atlassian developer site.**
+Rovo is listed for Standard, Premium and Enterprise only, and developers hit
+exactly this during Codegeist 2026: the Forge app installs cleanly, and Rovo is
+simply absent — no button, no chat, no agents list. A judge who installs onto a
+free site will see a panel that works and two agents that do not exist, and will
+score it as broken.
+
+The fix, confirmed by developers in that thread and by this build, is a **Forge
+demo site** (`forge site provision`), which ships enterprise Jira, Confluence,
+JSM *and* Rovo. One per developer, active 90 days. A Premium trial is reported
+as unreliable for this — at least one had Rovo disabled.
+
+**So the submission instructions must tell judges to install onto a demo site or
+a Rovo-enabled site, in the first line, before anything else.** This is the
+single most likely way to lose the submission to a configuration problem rather
+than a code problem.
+
+Our own site: `one-atlas-vwgf.atlassian.net`, expires **2027-02-17** — after the
+22 Dec deadline and after judging ends on 3 Feb, but only two weeks after. If
+anything needs re-demoing in February, check it is still alive.
+
 1. `forge install --site <judge-site> --product jira`
 2. Open any Jira Service Management issue → the **Gatekeeper** panel appears in
    the right-hand panel list.
