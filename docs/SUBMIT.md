@@ -106,14 +106,44 @@ the prerequisite. What is left is a form only you can fill.
 Go to
 <https://developer.atlassian.com/console/myapps/56faff4b-563a-4ab7-afcc-b0faba765e7d/manage/distribution>
 
-1. **Edit** → Distribution status → **Sharing**
-2. Fill the app details it then demands. It wants a **customer support contact**
-   and may want a **privacy policy** and **terms** URL. I have not invented
-   these — a support email you actually read, and a link on webrizz.dev, are
-   both fine for a hackathon entry.
-3. Under **Install this app onto**, tick **Jira** (only Jira; the app has no
+**Most of this is already filled in** — the form is open in the browser with
+three of its four required fields set:
+
+| Field | Value | Why |
+|---|---|---|
+| Distribution status | **Sharing with anyone** | "within organization" would exclude the judges |
+| Company/Department | Webrizz Dev | the console organisation name |
+| Customer support contact | <https://webrizz.dev/contact/> | real page, checked (HTTP 200), and keeps your email off a public install page |
+| Does your app store personal data? | **Yes** | it does — see below. It was defaulted to No, which was wrong |
+| Terms of service | left blank | optional |
+| **Privacy policy** | **still needed** | required, and must be a real URL |
+
+**Why the personal data answer is Yes.** The receipt chain records
+`user:<accountId>` whenever a person approves a held action or edits a rule
+pack, and it is append-only, so those ids persist for the life of the
+installation. The console's own wording — "if you copy and store personal data
+associated with user references (e.g. AccountID) ... or if you cache data for
+longer than 24 hours" — describes exactly what the app does. Declaring No would
+have been false on a page shown to everyone who installs it.
+
+**The privacy policy URL is the one thing left.** `PRIVACY.md` at the repo root
+is written and accurate — it lists the real storage keys, says plainly that
+account IDs and quoted issue text are stored, and that receipts are never
+deleted. It needs a URL. Two ways:
+
+- publish it at `https://webrizz.dev/privacy` (checked — nothing there now), or
+- push this repo to a **public** GitHub repo and use the file's URL.
+
+The second is needed anyway: **the repo has no git remote at all**, so judges
+currently have no way to read the code, and Devpost wants a repository link.
+
+Then, in the console:
+
+1. Paste the privacy URL into **Privacy policy** and press **Save changes**.
+2. Under **Install this app onto**, tick **Jira** (only Jira; the app has no
    Confluence or Bitbucket modules).
-4. Copy the installation link it generates.
+3. Copy the installation link it generates, and test it in a private window
+   before you submit — a link that 404s is scored as a broken app.
 
 Judges install from that link. Test it yourself in a private window first — a
 link that 404s is scored as a broken app.

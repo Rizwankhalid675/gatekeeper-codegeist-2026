@@ -253,6 +253,8 @@ that confirming everything is worse than not reviewing at all.
 
 ---
 
+Privacy policy: [`PRIVACY.md`](PRIVACY.md) — what the app stores, where, and for how long.
+
 ## The demo
 
 `video/gatekeeper-demo.mp4` (4:38, 1080p, narrated) — every screenshot in it is
