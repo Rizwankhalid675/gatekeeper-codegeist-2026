@@ -13,7 +13,6 @@ import React, { useEffect, useState } from 'react';
 import ForgeReconciler, {
   Button,
   Code,
-  DynamicTable,
   Em,
   Heading,
   Inline,
@@ -136,29 +135,68 @@ const App = () => {
     }
   };
 
-  const actionRows = pack.actions.map((a) => ({
-    key: a.id,
-    cells: [
-      { content: <Code>{a.id}</Code> },
-      { content: <Text>{a.title}</Text> },
-      { content: <Code>{a.effect}</Code> },
-      {
-        content: (
-          <Lozenge appearance={a.maxDisposition === 'auto' ? 'success' : 'inprogress'}>
-            {a.maxDisposition === 'auto' ? 'may run unattended' : 'always a human'}
-          </Lozenge>
-        ),
-      },
-      {
-        content: (
-          <Lozenge appearance={a.reversible ? 'default' : 'removed'}>
-            {a.reversible ? 'reversible' : 'irreversible'}
-          </Lozenge>
-        ),
-      },
-      { content: <Text>{a.allowedValues?.length ? a.allowedValues.join(', ') : '—'}</Text> },
-    ],
-  }));
+  /**
+   * Change one field on one action and save the whole pack. saveRulePack
+   * validates and bumps the version, which is what makes any verdict decided
+   * under the previous rules detectably stale — so editing the allow-list here
+   * cannot retroactively authorise something the gate already held.
+   */
+  const updateAction = (id, patch) =>
+    save({ ...pack, actions: pack.actions.map((a) => (a.id === id ? { ...a, ...patch } : a)) });
+
+  const ActionEditor = ({ a }) => (
+    <Stack space="space.100">
+      <Inline space="space.100" alignBlock="center">
+        <Code>{a.id}</Code>
+        <Text>
+          <Strong>{a.title}</Strong>
+        </Text>
+        <Lozenge>{a.effect}</Lozenge>
+      </Inline>
+
+      <Inline space="space.200" alignBlock="center">
+        <Inline space="space.075" alignBlock="center">
+          <Toggle
+            isChecked={a.maxDisposition === 'auto'}
+            isDisabled={busy}
+            onChange={() => updateAction(a.id, { maxDisposition: a.maxDisposition === 'auto' ? 'hold' : 'auto' })}
+            label={`May run unattended: ${a.id}`}
+          />
+          <Text>{a.maxDisposition === 'auto' ? 'may run unattended' : 'always a human'}</Text>
+        </Inline>
+
+        <Inline space="space.075" alignBlock="center">
+          <Toggle
+            isChecked={a.reversible !== false}
+            isDisabled={busy}
+            onChange={() => updateAction(a.id, { reversible: a.reversible === false })}
+            label={`Reversible: ${a.id}`}
+          />
+          <Text>{a.reversible === false ? 'irreversible — always held by R10' : 'reversible'}</Text>
+        </Inline>
+      </Inline>
+
+      <Inline space="space.100" alignBlock="center">
+        <Textfield
+          name={`values-${a.id}`}
+          defaultValue={(a.allowedValues || []).join(', ')}
+          isDisabled={busy}
+          placeholder="comma separated; empty means any value"
+          onBlur={(e) => {
+            const next = String(e.target.value || '')
+              .split(',')
+              .map((v) => v.trim())
+              .filter(Boolean);
+            const current = a.allowedValues || [];
+            if (next.join('\u0000') !== current.join('\u0000')) updateAction(a.id, { allowedValues: next });
+          }}
+        />
+        <Text>
+          <Em>permitted values — R02 rejects anything else</Em>
+        </Text>
+      </Inline>
+    </Stack>
+  );
 
   return (
     <Stack space="space.300">
@@ -228,25 +266,21 @@ const App = () => {
 
       <Stack space="space.100">
         <Heading as="h4">What this project permits</Heading>
-        <DynamicTable
-          head={{
-            cells: [
-              { key: 'id', content: 'Action' },
-              { key: 'title', content: 'What it does' },
-              { key: 'effect', content: 'Effect' },
-              { key: 'ceiling', content: 'Ceiling' },
-              { key: 'rev', content: 'Reversible' },
-              { key: 'values', content: 'Permitted values' },
-            ],
-          }}
-          rows={actionRows}
-        />
+        {pack.actions.map((a) => (
+          <ActionEditor key={a.id} a={a} />
+        ))}
         <Text>
           <Em>
             An agent can only ever choose from this list. An action id that is not here is refused by rule R01 before
             anything happens.
           </Em>
         </Text>
+        <SectionMessage appearance="warning" title="An empty permitted-values box means ANY value">
+          <Text>
+            R02 only restricts an action when it has permitted values. Clearing the box does not lock the action down,
+            it opens it up — the agent may then pass any value the effect accepts.
+          </Text>
+        </SectionMessage>
         <SectionMessage appearance="warning" title="Transition names are per-workflow">
           <Text>
             The permitted values for <Code>transition-issue</Code> must match this project's workflow exactly, and the

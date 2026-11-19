@@ -107,23 +107,34 @@ cannot reach from a pure function.
 | `label` | auto, after review | executed; `gatekeeper-incident` applied to CLSD-1 |
 | `link` | auto, after review | executed; CLSD-4 linked as a duplicate of CLSD-5 |
 | `assign` | human override from the panel | executed; CLSD-5 assigned, receipt `7feb0280799d...` |
-| `transition` | human override from the panel | **refusal path verified, success path not** |
+| `transition` | human override from the panel | both paths verified |
 
-The transition effect was proven to do the right thing with a *wrong* name: it
-read the issue's real transitions, refused `In Progress`, and named `Start`. It
-has never completed a transition, because the rule pack's permitted values do not
-include `Start` and R02 would reject it.
+The transition effect was proven twice over. With a *wrong* name it read the
+issue's real transitions, refused `In Progress` and named `Start`. After `Start`
+was added to the permitted values in the rule pack editor, a second proposal
+passed R02, was held at R05 as designed, and a human override moved CLSD-3 from
+**To Do** to **In Progress**.
 
-### Known gap: the rule pack's action allow-list is not editable in the UI
+### RESOLVED: the rule pack's action allow-list is now editable
 
-The editor can switch unattended action on and off, change the confidence floor,
-and load the demo packs. It **cannot** edit an action's permitted values. For a
-product whose claim is "onboarding a team is authoring a rule pack, not changing
-code", that is the most important missing control — and it is why the transition
-success path could not be verified without editing code.
+Each action in the editor now has its ceiling (may run unattended / always a
+human), its reversibility and its permitted values as live controls. Every change
+saves the whole pack through `saveRulePack`, which validates it and bumps the
+version — so editing the allow-list cannot retroactively authorise a verdict the
+gate already reached under the old rules. The UI says so on save:
 
-`saveRulePack` already accepts and validates a whole pack, so the resolver side
-is done; this is a front end that does not exist yet.
+    Saved as v3. Any verdict decided under v2 is now stale and cannot be executed.
+
+This closed the transition gap in the same session it was found: `Start` was
+added to the permitted values, and the next proposal passed R02 and transitioned
+the issue.
+
+One sharp edge is now called out in the UI rather than left implicit: **an empty
+permitted-values box means ANY value**, because R02 only restricts an action that
+has values. Clearing the box opens the action up rather than locking it down.
+
+The editor still cannot add or remove actions, only configure the ones the pack
+already defines.
 
 ### Known gap: only the REVIEWER's citations are verified
 
