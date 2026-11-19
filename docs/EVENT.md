@@ -138,6 +138,20 @@ Nothing is copied — Forge is a different runtime and the rules require the For
 1. Open <https://codegeist2026.devpost.com/>
 2. Click **Join Hackathon** (this is where you accept the Official Rules)
 3. Create the free Atlassian Cloud developer site at <https://developer.atlassian.com/cloud/>
-4. Install the Forge CLI, run `forge login`, scaffold with `forge create`
-5. Build. Submit well before 22 Dec 12:00 PT — the first 300 eligible submissions get the
+4. `npm install -g @forge/cli`, then `forge login` — it wants your Atlassian email and a
+   **Forge CLI scoped token** from <https://go.atlassian.com/forge-cli-api-token>
+5. **Create a Developer Space.** Not in the rules, and not in Atlassian's getting-started
+   page either — `forge register` simply refuses without one: *"You are not currently a
+   member of a Developer Space. You must be a member of a Developer Space to register an
+   app."* It prompts for a name on first `forge register`. This is a persistent entity in
+   your Atlassian account and brings you under the Atlassian developer terms, so it is a
+   decision, not a formality. Background:
+   <https://developer.atlassian.com/platform/forge/developer-space/developer-spaces-introduction>
+6. `forge register` → `forge deploy` → `forge install`. Register writes the real `app.id`
+   over the placeholder in `manifest.yml`, so there is a manifest change to commit afterwards.
+7. Build. Submit well before 22 Dec 12:00 PT — the first 300 eligible submissions get the
    participation prize, and a wire-time submission risks the queue.
+
+**Node version:** the Forge CLI supports 22.x or 24.x and warns on anything else. This machine
+has 26.13.0, which has worked for `login`, `settings` and `lint` so far. If `deploy` misbehaves,
+suspect this first and `brew install node@22`.
