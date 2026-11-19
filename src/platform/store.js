@@ -4,17 +4,22 @@
  * Thin on purpose. Everything that decides anything takes a `{ get, set }` and
  * does not know Forge exists, which is what lets the gate, the receipt chain and
  * the executor be tested without the Forge runtime.
+ *
+ * Uses @forge/kvs rather than the `storage` export from @forge/api, which
+ * forge lint flags as deprecated. Because this adapter is the only place in the
+ * app that touches storage at all, swapping the backing API is a four-line
+ * change rather than a migration.
  */
 
-import { storage } from '@forge/api';
+import { kvs } from '@forge/kvs';
 
 /** @type {import('../gate/receipts.js').Store} */
 export const forgeStore = {
   async get(key) {
-    return storage.get(key);
+    return kvs.get(key);
   },
   async set(key, value) {
-    await storage.set(key, value);
+    await kvs.set(key, value);
   },
 };
 

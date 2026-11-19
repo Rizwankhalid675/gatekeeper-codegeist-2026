@@ -54,10 +54,10 @@ modules:
       function: triageIncident
       actionVerb: CREATE
       description: >-
-        Run the full Gatekeeper pipeline on one Jira issue: gather evidence,
-        correlate it against recent issues, propose a remediation, review it
-        adversarially, run the eleven-rule policy gate, and either execute the
-        action or hold it for a human. Always writes a receipt.
+        Run the Gatekeeper pipeline on one Jira issue: gather evidence,
+        correlate against recent issues, run the eleven-rule policy gate, then
+        execute the proposed action or hold it for a human. Always writes a
+        receipt.
       inputs:
         issueKey:
           title: Issue key
@@ -133,10 +133,10 @@ modules:
           type: string
           required: false
           description: >-
-            Verbatim lines from the SOURCE evidence that support your verdict,
-            one per line. These are re-verified by deterministic code against
-            source evidence only — another agent's output does not count as
-            corroboration. A fabricated citation holds the action under R08.
+            Verbatim lines from the SOURCE evidence supporting your verdict, one
+            per line. Re-verified by deterministic code against source evidence
+            only — another agent's output is not corroboration. A fabricated
+            citation holds the action under R08.
 
     - key: explain-verdict
       name: Explain the last verdict

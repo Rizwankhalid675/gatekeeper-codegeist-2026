@@ -212,6 +212,25 @@ test('the app declares a runtime and exactly the scopes it uses', () => {
   );
 });
 
+test('no manifest string exceeds the 255-character limit Forge enforces', () => {
+  // Learned from the real linter, not the docs: forge deploy refuses the whole
+  // manifest with "must NOT have more than 255 characters", and because the
+  // schema uses oneOf, the failing branch ALSO reports a misleading "action
+  // required properties are ..." error that sends you looking in the wrong place.
+  const over = [];
+  const walk = (node, path) => {
+    if (node === null || typeof node !== 'object') return;
+    for (const [k, v] of Object.entries(node)) {
+      const p = `${path}.${k}`;
+      if (typeof v === 'string') {
+        if (v.length > 255) over.push(`${p} is ${v.length} characters`);
+      } else walk(v, p);
+    }
+  };
+  walk(manifest, 'manifest');
+  assert.deepEqual(over, [], `over the 255-character limit:\n  ${over.join('\n  ')}`);
+});
+
 test('the app id is a well-formed ARI', () => {
   // A placeholder is expected in the repo; forge register writes the real one.
   // What must not happen is a malformed value that fails at deploy time.
