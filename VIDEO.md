@@ -23,11 +23,30 @@ thing, which is labelled on screen where it happens: the Atlassian **accountIds*
 in the rule pack history are masked, because the video is going somewhere
 public.
 
-    1920x1080 · h264 · 3:25 · 3.2 MB · silent (AAC silence track)
-    video/gatekeeper-demo.srt — subtitles matching the captions
+    1920x1080 · h264 · 4:29 · 9 MB · narrated
+    video/gatekeeper-demo.srt — subtitles of what is said
 
-Rebuild it with `python3 video/build.py`. The shot list, durations and caption
-text are all in that file; edit and re-run.
+**It is narrated.** The voice is macOS's own `say` (Daniel, en_GB, 168 wpm),
+synthesised locally: no API key, no cost, and not a word of this project sent to
+any service. The spoken script is `video/narration.py`, one line per shot, and
+rule ids and digests are spelled there the way a synthesiser gets them right
+("rule R twelve", "S H A two fifty six") while the captions on screen keep the
+real spelling.
+
+**The narration drives the edit, not the other way round.** Each shot holds for
+exactly as long as its line takes to say, plus 0.7s before and 1.0s after, so the
+picture never cuts mid-sentence. Measured on the finished file: every speech
+onset lands within 0.03s of its shot start.
+
+Rebuild:
+
+    python3 video/narration.py   # outside the Bash sandbox — see below
+    python3 video/build.py
+
+`say` must run outside the sandbox. Inside it, `say` exits 0 and writes a 4 KB
+file containing no audio at all — `narration.py` checks the file size and fails
+loudly rather than letting a silent video get built. The shot list, durations
+and caption text are in `build.py`; the spoken lines are in `narration.py`.
 
 **Why stills and not motion.** macOS screen recording needs a human at the
 keyboard. The browser extension's GIF recorder was tried and measured — 0.81
@@ -38,13 +57,14 @@ thing a judge actually needs to read.
 
 **What it is missing, and what only you can do:**
 
-- **Narration.** The cut is silent and carries its argument in captions. If you
-  want a voice-over, the SRT has the cue timings; record against the picture.
+- **Judge the voice.** It is a synthesised read, and I cannot hear it to check.
+  If it grates, record yourself over the same cut — the SRT has the cue timings
+  and the shot boundaries are printed by `build.py`.
 - **The YouTube upload, public.** Unlisted fails the rule as written. I cannot
   upload to your account.
 - The link then goes in the README *and* on the Devpost submission form.
 
-**If you would rather have a real screen recording**, the beat-by-beat script
+**If you would rather have a real screen recording with your own voice**, the beat-by-beat script
 below still stands and is still the better artefact — the cut above is the
 floor, not the ceiling.
 

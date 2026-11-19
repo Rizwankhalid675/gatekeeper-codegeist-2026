@@ -1,82 +1,287 @@
 1
-00:00:00,000 --> 00:00:06,700
-Gatekeeper
-The model proposes. Deterministic code decides. Nothing executes without a receipt.
+00:00:00,700 --> 00:00:01,746
+This is Gatekeeper.
 
 2
-00:00:07,000 --> 00:00:16,699
-This is the entire issue.
-Summary: "Issue xyz". Description: "issue with this thing".
+00:00:01,826 --> 00:00:08,876
+It is a Forge app for incident triage in Jira Service Management, and it is built on one rule.
 
 3
-00:00:17,000 --> 00:00:29,699
-Two lines of source evidence, hashed before any model runs.
-Gatekeeper's own comment is marked derived — one model cannot corroborate another.
+00:00:08,956 --> 00:00:10,002
+The model proposes.
 
 4
-00:00:30,000 --> 00:00:38,700
-"Critical failure in the production database connection pool." — about an issue whose entire description is "issue with this thing"
+00:00:10,082 --> 00:00:11,128
+Deterministic code decides.
 
 5
-00:00:39,000 --> 00:00:52,700
-Receipt 000002: executed. "All eleven rules passed."
-It posted an outage that does not exist, and every rule agreed.
+00:00:11,208 --> 00:00:13,380
+And nothing executes without a receipt.
 
 6
-00:00:53,000 --> 00:01:04,700
-So the gate got a twelfth rule
-R08 verified the reviewer's citations and took the proposer's on trust. That is backwards: the proposer is the one asking to act. R12 — Proposal citations appear in source evidence.
+00:00:15,160 --> 00:00:16,419
+Here is the incident.
 
 7
-00:01:05,000 --> 00:01:17,700
-Held by R07 and R12.
-"1 of 1 citation(s) are not in the source evidence."
+00:00:16,499 --> 00:00:18,092
+This is not an excerpt.
 
 8
-00:01:18,000 --> 00:01:31,700
-Ten passed, two fired, all twelve reported.
-An operator can see the hold was specific rather than a blanket refusal.
+00:00:18,172 --> 00:00:19,766
+It is the entire issue.
 
 9
-00:01:32,000 --> 00:01:44,700
-Three trust levels, and only one of them may decide.
+00:00:19,846 --> 00:00:22,109
+The summary reads, issue X Y Z.
 
 10
-00:01:45,000 --> 00:01:56,700
-Onboarding a team is authoring one of these, not changing code.
-Unattended action is off by default — somebody has to choose otherwise.
+00:00:22,189 --> 00:00:24,452
+The description reads, issue with this thing.
 
 11
-00:01:57,000 --> 00:02:09,699
-Comment and label may run unattended. Transition and assign never do.
-R05 caps an action however confident the model claims to be.
+00:00:24,532 --> 00:00:26,460
+There is nothing else in it.
 
 12
-00:02:10,000 --> 00:02:22,699
-Five effects — the executor's whole dispatch table.
-A new action arrives capped at hold; clearing it is a separate, deliberate click.
+00:00:28,240 --> 00:00:33,023
+Before any model is asked anything, Gatekeeper gathers the evidence and hashes it.
 
 13
-00:02:23,000 --> 00:02:36,699
-Every rule pack change is a receipt, chained by sha256.
-The diff says whether a change widened what a robot may do.
+00:00:33,103 --> 00:00:36,390
+Two lines of source evidence, taken from Jira itself.
 
 14
-00:02:37,000 --> 00:02:49,699
-"You are changing v8, but CLSD is now at v9. Nothing was saved."
-A tightening made after an incident survives somebody else's stale tab.
+00:00:36,470 --> 00:00:39,008
+Notice the third item is marked derived.
 
 15
-00:02:50,000 --> 00:03:04,699
-The limits, written before you asked
-The traffic is a demo site. There is no measured noise-reduction number, because an honest one needs a real queue with real labels. R12 checks that a citation exists — not that it supports the conclusion. Forge storage has no compare-and-swap, so the conflict check is a check, not a guarantee. All of it is in docs/LIMITS.md.
+00:00:39,088 --> 00:00:46,490
+That is Gatekeeper's own comment, and it can never count as corroboration, because one model may not vouch for another.
 
 16
-00:03:05,000 --> 00:03:16,699
-169 tests, no Forge runtime, no network
-The gate is a pure function: no clock, no storage, no network. The executor re-derives its own authorisation and ignores the verdict handed to it. Every screenshot in this video is the app running on a real Jira site.
+00:00:48,270 --> 00:00:51,767
+And this is what the agent wrote about that issue.
 
 17
-00:03:17,000 --> 00:03:24,699
-The model cannot talk its way past it
-Repo and install link are on the submission.
+00:00:51,847 --> 00:00:54,987
+A critical failure in the production database connection pool.
+
+18
+00:00:55,067 --> 00:00:56,417
+There is no outage.
+
+19
+00:00:56,497 --> 00:00:57,848
+There is no database.
+
+20
+00:00:57,928 --> 00:01:00,710
+The model invented it, at ninety percent confidence.
+
+21
+00:01:02,490 --> 00:01:06,440
+Here is the audit trail, and here is the uncomfortable part.
+
+22
+00:01:06,520 --> 00:01:07,539
+Receipt number two.
+
+23
+00:01:07,619 --> 00:01:07,906
+Executed.
+
+24
+00:01:07,986 --> 00:01:09,371
+All eleven rules passed.
+
+25
+00:01:09,451 --> 00:01:19,630
+The old gate verified the reviewer's citations and took the proposing agent's on trust, so an invented outage was posted to a real issue, and every rule agreed.
+
+26
+00:01:21,410 --> 00:01:24,135
+So the gate got a twelfth rule.
+
+27
+00:01:24,215 --> 00:01:28,943
+Rule R twelve re-checks the proposing agent's citations against the source evidence.
+
+28
+00:01:29,023 --> 00:01:32,950
+Deterministically, in trusted code, after the model has finished talking.
+
+29
+00:01:34,730 --> 00:01:36,264
+The same issue, re-run today.
+
+30
+00:01:36,344 --> 00:01:39,170
+Held by rule R seven and rule R twelve.
+
+31
+00:01:39,250 --> 00:01:42,399
+One of one citation is not in the source evidence.
+
+32
+00:01:42,479 --> 00:01:45,950
+The hold names the rule, and the rule names the reason.
+
+33
+00:01:47,730 --> 00:01:51,344
+Every rule is evaluated on every decision, and every rule is reported.
+
+34
+00:01:51,424 --> 00:01:54,730
+The ten that passed, as well as the two that fired.
+
+35
+00:01:54,810 --> 00:02:01,810
+An operator reading a hold at three in the morning needs to see that the refusal was specific, rather than a blanket no.
+
+36
+00:02:03,590 --> 00:02:05,649
+The architecture is three trust levels.
+
+37
+00:02:05,729 --> 00:02:11,709
+Correlation is deterministic, and decides what deserves a human at all before a model is asked anything.
+
+38
+00:02:11,789 --> 00:02:13,848
+The two Rovo agents are untrusted.
+
+39
+00:02:13,928 --> 00:02:18,482
+Delete them and there is no diagnosis, but they are never the authority.
+
+40
+00:02:18,562 --> 00:02:22,760
+The gate and the executor are deterministic, and only they may decide.
+
+41
+00:02:24,540 --> 00:02:26,718
+A project is a rule pack.
+
+42
+00:02:26,798 --> 00:02:30,857
+Onboarding a team means authoring one of these, not changing code.
+
+43
+00:02:30,937 --> 00:02:38,760
+Unattended action is off by default, so installing this app changes nothing about your incident queue until somebody deliberately chooses otherwise.
+
+44
+00:02:40,540 --> 00:02:42,197
+Each action has a ceiling.
+
+45
+00:02:42,277 --> 00:02:44,628
+Here, commenting and labelling may run unattended.
+
+46
+00:02:44,708 --> 00:02:47,406
+Transitioning an issue and assigning one never do.
+
+47
+00:02:47,486 --> 00:02:51,921
+Rule R five caps an action however confident the model claims to be.
+
+48
+00:02:52,001 --> 00:02:54,700
+That is the knob a team actually turns.
+
+49
+00:02:56,480 --> 00:02:57,099
+Five effects.
+
+50
+00:02:57,179 --> 00:03:04,438
+That is the executor's entire dispatch table, and there is no path from a model's output to any other Jira call.
+
+51
+00:03:04,518 --> 00:03:06,885
+A new action arrives capped at hold.
+
+52
+00:03:06,965 --> 00:03:10,380
+Clearing it for unattended use is a separate, deliberate click.
+
+53
+00:03:12,160 --> 00:03:18,688
+Gatekeeper used to record every action a robot took, and nothing at all about the person who decided what robots may do.
+
+54
+00:03:18,768 --> 00:03:23,794
+Now every rule pack change is a receipt too, chained by S H A two fifty six.
+
+55
+00:03:23,874 --> 00:03:28,300
+And the difference says whether the change widened what a robot is allowed to do.
+
+56
+00:03:30,080 --> 00:03:33,106
+Two administrators can no longer quietly overwrite each other.
+
+57
+00:03:33,186 --> 00:03:35,177
+This tab was editing version eight.
+
+58
+00:03:35,257 --> 00:03:37,938
+The pack had already moved to version nine.
+
+59
+00:03:38,018 --> 00:03:44,840
+The save is refused and nothing is written, so a tightening made after an incident survives somebody else's stale tab.
+
+60
+00:03:46,620 --> 00:03:48,090
+What I will not claim.
+
+61
+00:03:48,170 --> 00:03:50,260
+The traffic here is a demo site.
+
+62
+00:03:50,340 --> 00:03:55,840
+There is no measured noise reduction number, because an honest one needs a real queue with real labels.
+
+63
+00:03:55,920 --> 00:03:58,320
+Rule R twelve checks that a citation exists.
+
+64
+00:03:58,400 --> 00:04:01,110
+Not that it supports the conclusion drawn from it.
+
+65
+00:04:01,190 --> 00:04:04,210
+All of it is written down in the limits document.
+
+66
+00:04:05,990 --> 00:04:08,141
+A hundred and sixty nine tests.
+
+67
+00:04:08,221 --> 00:04:12,604
+No Forge runtime, no network, and no credentials needed to run them.
+
+68
+00:04:12,684 --> 00:04:14,835
+The gate is a pure function.
+
+69
+00:04:14,915 --> 00:04:19,670
+The executor re-derives its own authorisation, and ignores the verdict it was handed.
+
+70
+00:04:21,450 --> 00:04:22,630
+The model proposes.
+
+71
+00:04:22,710 --> 00:04:23,890
+Deterministic code decides.
+
+72
+00:04:23,970 --> 00:04:27,670
+And the model cannot talk its way past it.

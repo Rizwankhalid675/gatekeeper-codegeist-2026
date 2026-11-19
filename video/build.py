@@ -28,7 +28,14 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent
 FRAMES = ROOT / 'frames'
 BUILD = ROOT / 'build'
+AUDIO = ROOT / 'audio'
 OUT = ROOT / 'gatekeeper-demo.mp4'
+
+# Breathing room around each spoken line, in seconds. The head pad lets the
+# viewer's eye land on the new frame before anybody starts talking; the tail pad
+# stops one shot's last word running into the next shot's first.
+PAD_HEAD = 0.7
+PAD_TAIL = 1.0
 
 W, H = 1920, 1080
 FPS = 30
@@ -260,6 +267,59 @@ SHOTS = [
 ]
 
 
+def audio_duration(path):
+    return float(subprocess.run(
+        ['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', str(path)],
+        capture_output=True, text=True, check=True).stdout.strip())
+
+
+def shot_durations():
+    """
+    Shot lengths come from the narration, not the other way round.
+
+    Each shot holds for as long as its spoken line takes, plus padding — so the
+    picture never cuts mid-sentence and nothing sits silent on screen. The `secs`
+    in SHOTS is kept as a floor for the rare shot whose line is very short.
+    If the narration has not been generated, fall back to those fixed lengths.
+    """
+    if not AUDIO.exists() or not list(AUDIO.glob('*.wav')):
+        print('  (no narration found — using the fixed shot lengths)')
+        return [float(s[2]) for s in SHOTS], False
+
+    durs = []
+    for i, (_, _, floor) in enumerate(SHOTS):
+        wav = AUDIO / f'{i:02d}.wav'
+        if not wav.exists():
+            sys.exit(f'narration missing for shot {i}: run video/narration.py')
+        durs.append(round(max(float(floor), PAD_HEAD + audio_duration(wav) + PAD_TAIL), 2))
+    return durs, True
+
+
+def build_audio_track(durs):
+    """One padded wav per shot, concatenated, so speech lands PAD_HEAD into its own shot."""
+    segs = []
+    for i, dur in enumerate(durs):
+        seg = BUILD / f'a{i:02d}.wav'
+        subprocess.run([
+            'ffmpeg', '-y', '-loglevel', 'error',
+            '-i', str(AUDIO / f'{i:02d}.wav'),
+            '-af', f'adelay={int(PAD_HEAD * 1000)}|{int(PAD_HEAD * 1000)},apad',
+            '-t', f'{dur}', '-ac', '2', '-ar', '48000', '-c:a', 'pcm_s16le',
+            str(seg),
+        ], check=True)
+        segs.append(seg)
+
+    listing = BUILD / 'audio.txt'
+    listing.write_text('\n'.join(f"file '{s.name}'" for s in segs) + '\n')
+    track = BUILD / 'narration.wav'
+    subprocess.run([
+        'ffmpeg', '-y', '-loglevel', 'error',
+        '-f', 'concat', '-safe', '0', '-i', str(listing),
+        '-c', 'copy', str(track),
+    ], check=True, cwd=BUILD)
+    return track
+
+
 def build():
     if not shutil.which('rsvg-convert'):
         sys.exit('rsvg-convert is required')
@@ -267,11 +327,13 @@ def build():
     for old in BUILD.glob('*'):
         old.unlink()
 
-    total = sum(s[2] for s in SHOTS)
+    durations, narrated = shot_durations()
+    total = sum(durations)
     elapsed = 0.0
     entries = []
 
-    for i, (fn, args, secs) in enumerate(SHOTS):
+    for i, (fn, args, _floor) in enumerate(SHOTS):
+        secs = durations[i]
         progress = elapsed / total
         if fn is shot_image:
             path, kicker, head, sub = args[0], args[1], args[2], args[3]
@@ -292,7 +354,7 @@ def build():
         subprocess.run(['rsvg-convert', '-w', str(W), '-h', str(H), str(svg_path), '-o', str(png_path)], check=True)
         entries.append((png_path, secs))
         elapsed += secs
-        print(f'  shot {i:02d}  {secs:>2}s  {png_path.name}')
+        print(f'  shot {i:02d}  {secs:>6.2f}s  {png_path.name}')
 
     concat = BUILD / 'concat.txt'
     lines = []
@@ -302,54 +364,84 @@ def build():
     lines.append(f"file '{entries[-1][0].name}'")  # concat demuxer needs the last frame repeated
     concat.write_text('\n'.join(lines) + '\n')
 
-    # A silent AAC track. The video has no narration, and some players and
-    # upload pipelines behave oddly with a video-only MP4.
+    # The narration if it exists, silence otherwise. A video-only MP4 makes some
+    # players and upload pipelines behave oddly, so there is always a track.
+    if narrated:
+        audio_in = ['-i', str(build_audio_track(durations))]
+        audio_args = ['-c:a', 'aac', '-b:a', '160k']
+    else:
+        audio_in = ['-f', 'lavfi', '-i', 'anullsrc=channel_layout=stereo:sample_rate=48000']
+        audio_args = ['-c:a', 'aac', '-b:a', '96k']
+
     subprocess.run([
         'ffmpeg', '-y', '-loglevel', 'error',
         '-f', 'concat', '-safe', '0', '-i', str(concat),
-        '-f', 'lavfi', '-i', 'anullsrc=channel_layout=stereo:sample_rate=48000',
-        '-vf', f'fps={FPS},format=yuv420p,fade=t=in:st=0:d=0.6,fade=t=out:st={total - 0.8}:d=0.8',
+        *audio_in,
+        '-vf', f'fps={FPS},format=yuv420p,fade=t=in:st=0:d=0.6,fade=t=out:st={total - 0.8:.2f}:d=0.8',
+        '-af', f'afade=t=out:st={total - 0.8:.2f}:d=0.8',
         '-c:v', 'libx264', '-preset', 'slow', '-crf', '19',
-        '-c:a', 'aac', '-b:a', '96k', '-shortest',
+        *audio_args, '-shortest',
         '-movflags', '+faststart',
         str(OUT),
     ], check=True, cwd=BUILD)
 
-    write_srt()
-    print(f'\n{OUT}  —  {total}s ({total // 60}:{total % 60:02d})')
+    write_srt(durations)
+    mins, secs = divmod(int(round(total)), 60)
+    print(f'\n{OUT}  —  {total:.0f}s ({mins}:{secs:02d})'
+          f'{"  with narration" if narrated else "  SILENT"}')
 
 
-def write_srt():
+def write_srt(durations):
     """
-    Subtitles matching the on-screen captions.
+    Subtitles carrying what is actually said, so the video is watchable with the
+    sound off and searchable once uploaded.
 
-    Two uses: upload them with the video so it is watchable with sound off and
-    searchable, and use the timings as the cue sheet if a voice-over is recorded
-    over this cut later.
+    Each shot's narration is split into sentences and spread across the shot in
+    proportion to its length. That is an approximation of where each sentence
+    falls, not a transcript alignment — close enough to read along with, and it
+    costs nothing.
     """
     def ts(seconds):
         h, rem = divmod(int(seconds), 3600)
         m, s = divmod(rem, 60)
-        ms = int((seconds - int(seconds)) * 1000)
+        ms = int(round((seconds - int(seconds)) * 1000))
         return f'{h:02d}:{m:02d}:{s:02d},{ms:03d}'
 
-    lines, t, n = [], 0.0, 1
-    for fn, args, secs in SHOTS:
-        if fn is shot_image:
-            text = f'{args[2]}\n{args[3]}'
-        elif fn is shot_title:
-            text = f'{args[0]}\n{args[1]}'
-        elif fn is shot_quote:
-            text = ('"Critical failure in the production database connection pool." '
-                    '— ' + args[1])
-        elif fn is shot_arch:
-            text = 'Three trust levels, and only one of them may decide.'
+    try:
+        from narration import LINES
+    except ImportError:
+        LINES = None
+
+    cues, t, n = [], 0.0, 1
+    for i, (fn, args, _floor) in enumerate(SHOTS):
+        secs = durations[i]
+        if LINES:
+            spoken = LINES[i]
+            sentences = [s.strip() + '.' for s in spoken.split('. ') if s.strip()]
+            sentences[-1] = sentences[-1].rstrip('.') + '.'
+            words = sum(len(s.split()) for s in sentences) or 1
+            at = t + PAD_HEAD
+            available = secs - PAD_HEAD - PAD_TAIL
+            for s in sentences:
+                span = available * (len(s.split()) / words)
+                cues.append(f'{n}\n{ts(at)} --> {ts(at + span - 0.08)}\n{s}\n')
+                at += span
+                n += 1
         else:
-            text = args[1] + '\n' + ' '.join(t for t, _ in args[2])
-        lines.append(f'{n}\n{ts(t)} --> {ts(t + secs - 0.3)}\n{text}\n')
+            if fn is shot_image:
+                text = f'{args[2]}\n{args[3]}'
+            elif fn is shot_title:
+                text = f'{args[0]}\n{args[1]}'
+            elif fn is shot_quote:
+                text = '"Critical failure in the production database connection pool."'
+            elif fn is shot_arch:
+                text = 'Three trust levels, and only one of them may decide.'
+            else:
+                text = args[1]
+            cues.append(f'{n}\n{ts(t)} --> {ts(t + secs - 0.3)}\n{text}\n')
+            n += 1
         t += secs
-        n += 1
-    (ROOT / 'gatekeeper-demo.srt').write_text('\n'.join(lines))
+    (ROOT / 'gatekeeper-demo.srt').write_text('\n'.join(cues))
 
 
 if __name__ == '__main__':

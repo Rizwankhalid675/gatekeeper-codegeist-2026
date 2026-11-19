@@ -1,3 +1,4 @@
-# Intermediate SVG/PNG frames and the concat list. The script regenerates them.
+# Intermediate SVG/PNG frames, padded audio segments and check stills.
+# narration.py and build.py regenerate all of it.
 build/
 check/
