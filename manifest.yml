@@ -9,9 +9,9 @@ modules:
     - key: gatekeeper-agent
       name: Gatekeeper
       description: >-
-        Triages incidents in this project. Proposes a diagnosis and a remediation
-        drawn only from the actions an admin authorised, then shows you the
-        deterministic verdict and the receipt.
+        Triages incidents in this project. Proposes a diagnosis and a
+        remediation drawn only from the actions an admin authorised, then shows
+        you the deterministic verdict and the receipt.
       prompt: resource:prompts;agent.md
       conversationStarters:
         - Triage NW-101 and show me the verdict
@@ -69,8 +69,8 @@ modules:
           type: string
           required: true
           description: >-
-            Why you believe this is the right action, in your own words. Required
-            even when you propose no action.
+            Why you believe this is the right action, in your own words.
+            Required even when you propose no action.
         confidence:
           title: Confidence
           type: number
@@ -92,8 +92,8 @@ modules:
           required: false
           description: >-
             A JSON object of parameters for the action, for example
-            {"body":"..."} for a comment or {"label":"gatekeeper-incident"} for a
-            label. Malformed JSON is refused.
+            {"body":"..."} for a comment or {"label":"gatekeeper-incident"} for
+            a label. Malformed JSON is refused.
         quotes:
           title: Supporting quotes
           type: string
@@ -109,8 +109,9 @@ modules:
       function: reviewProposal
       actionVerb: CREATE
       description: >-
-        Record an adversarial review of the proposal on an issue, then re-run the
-        policy gate. Nothing runs unattended until a review is on the record.
+        Record an adversarial review of the proposal on an issue, then re-run
+        the policy gate. Nothing runs unattended until a review is on the
+        record.
       inputs:
         issueKey:
           title: Issue key
@@ -132,9 +133,9 @@ modules:
           type: string
           required: false
           description: >-
-            Verbatim lines from the SOURCE evidence that support your verdict, one
-            per line. These are re-verified by deterministic code against source
-            evidence only — another agent's output does not count as
+            Verbatim lines from the SOURCE evidence that support your verdict,
+            one per line. These are re-verified by deterministic code against
+            source evidence only — another agent's output does not count as
             corroboration. A fabricated citation holds the action under R08.
 
     - key: explain-verdict
@@ -245,9 +246,7 @@ resources:
 app:
   runtime:
     name: nodejs22.x
-  # Replaced by `forge register`. Left as a placeholder so the manifest is
-  # readable in the repo; `forge lint` and `forge deploy` need the real one.
-  id: ari:cloud:ecosystem::app/00000000-0000-0000-0000-000000000000
+  id: ari:cloud:ecosystem::app/56faff4b-563a-4ab7-afcc-b0faba765e7d
 
 permissions:
   scopes:
