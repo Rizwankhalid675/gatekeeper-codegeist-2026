@@ -28,6 +28,9 @@ const functionKeys = new Set((modules.function || []).map((f) => f.key));
 const resourceKeys = new Set((manifest.resources || []).map((r) => r.key));
 
 const ALLOWED_VERBS = new Set(['GET', 'CREATE', 'UPDATE', 'DELETE', 'TRIGGER']);
+
+/** Every module group that renders a UI Kit page and therefore needs a resolver. */
+const UI_KIT_GROUPS = ['jira:issuePanel', 'jira:projectSettingsPage', 'jira:adminPage'];
 const ALLOWED_INPUT_TYPES = new Set(['string', 'integer', 'number', 'boolean']);
 
 test('every action an agent lists actually exists', () => {
@@ -62,7 +65,7 @@ test('every declared function is actually exported by src/index.js', () => {
 test('every function declared in the manifest is referenced by something', () => {
   const referenced = new Set();
   for (const action of modules.action || []) referenced.add(action.function);
-  for (const group of ['jira:issuePanel', 'jira:projectSettingsPage']) {
+  for (const group of UI_KIT_GROUPS) {
     for (const m of modules[group] || []) if (m.resolver?.function) referenced.add(m.resolver.function);
   }
   for (const fn of modules.function || []) {
@@ -140,7 +143,7 @@ test('every resource key referenced by a module exists, and its path is on disk'
     assert.ok(existsSync(p), `resource "${r.key}" points at ${r.path}, which does not exist`);
   }
 
-  for (const group of ['jira:issuePanel', 'jira:projectSettingsPage']) {
+  for (const group of UI_KIT_GROUPS) {
     for (const m of modules[group] || []) {
       assert.ok(resourceKeys.has(m.resource), `${group} "${m.key}" uses undeclared resource "${m.resource}"`);
     }
@@ -164,7 +167,7 @@ test('every resource:key;file reference resolves to a real file', () => {
 });
 
 test('UI Kit modules declare render: native and a resolver', () => {
-  for (const group of ['jira:issuePanel', 'jira:projectSettingsPage']) {
+  for (const group of UI_KIT_GROUPS) {
     for (const m of modules[group] || []) {
       assert.equal(m.render, 'native', `${group} "${m.key}" needs render: native for UI Kit`);
       assert.ok(m.resolver?.function, `${group} "${m.key}" needs a resolver function`);

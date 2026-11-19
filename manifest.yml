@@ -219,6 +219,19 @@ modules:
       render: native
       title: Gatekeeper rules
 
+  # A globally reachable surface for the rule pack editor. jira:projectSettingsPage
+  # is documented as working in JSM, but it does not appear in the new JSM "Space
+  # settings" navigation on a current demo site — verified by inspecting the nav,
+  # where only Automation is listed under Apps. An admin page is always reachable
+  # from Settings > Apps, so judges can always find the editor.
+  jira:adminPage:
+    - key: gatekeeper-admin
+      resource: settings
+      resolver:
+        function: resolver
+      render: native
+      title: Gatekeeper rules
+
   function:
     - key: triageIncident
       handler: index.triageIncident

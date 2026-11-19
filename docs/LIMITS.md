@@ -76,6 +76,26 @@ There is no outage; the model invented one. The gate held it under R04 and R07
 regardless, which is precisely the argument: the confidence floor would not have
 caught this, because the model was confident and wrong.
 
+### OPEN, and submission-blocking: the rule pack editor is unreachable
+
+`jira:projectSettingsPage` is documented as working in Jira Service Management,
+and `forge lint` accepts it, but on a current demo site it does **not** appear in
+the new JSM "Space settings" navigation — only Automation is listed under Apps.
+Checked the settings nav, `/settings/apps`, the global `/jira/settings/apps`, and
+the Apps menu.
+
+This matters more than it sounds. Every project defaults to
+`unattendedAllowed: false`, and the rule pack editor is the only way to change
+that. If a judge cannot reach it, **nothing can ever reach `auto`**, and half the
+product is invisible — they would see a system that only ever says "held".
+
+`jira:adminPage` has been added as a second, globally reachable surface. It
+deploys and lints clean, but has **not** been verified to render; the
+installation upgrade that would publish the new module is still pending.
+
+Until this is resolved, the auto-execute path, the transition effect and the full
+two-agent handoff to `auto` remain untested against a live site.
+
 Specific things most likely to be wrong on first contact:
 
 - **ADF handling.** `plainText()` walks Atlassian Document Format by hand so the
