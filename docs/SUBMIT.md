@@ -126,16 +126,42 @@ associated with user references (e.g. AccountID) ... or if you cache data for
 longer than 24 hours" — describes exactly what the app does. Declaring No would
 have been false on a page shown to everyone who installs it.
 
-**The privacy policy URL is the one thing left.** `PRIVACY.md` at the repo root
-is written and accurate — it lists the real storage keys, says plainly that
-account IDs and quoted issue text are stored, and that receipts are never
-deleted. It needs a URL. Two ways:
+**The privacy policy URL is the one thing left, and the repo is where it goes.**
 
-- publish it at `https://webrizz.dev/privacy` (checked — nothing there now), or
-- push this repo to a **public** GitHub repo and use the file's URL.
+Decided this way because a public GitHub repo solves three required things at
+once — the privacy URL, judges being able to read the code, and Devpost's
+repository field. Hosting the policy on webrizz.dev would solve only the first
+and leave the code unreachable.
 
-The second is needed anyway: **the repo has no git remote at all**, so judges
-currently have no way to read the code, and Devpost wants a repository link.
+The repo is ready to publish: 91 tracked files, no `node_modules`, no `.env`,
+and the accountIds in the three screenshots that showed them are masked
+(`scripts/mask-accountids.py`). The largest file is the 9 MB demo video.
+
+**Two commands — they need your GitHub login, so they are yours to run.** The
+`gh` token in the keyring has expired:
+
+```bash
+gh auth refresh -h github.com
+```
+
+```bash
+cd ~/Desktop/PW/hackathons/codegeist-2026 && gh repo create gatekeeper-codegeist-2026 --public --source=. --remote=origin --push
+```
+
+The privacy policy URL is then:
+
+    https://github.com/Rizwankhalid675/gatekeeper-codegeist-2026/blob/main/PRIVACY.md
+
+Two things to know before you run it, neither a blocker:
+
+- Your commit email (`rizwan.khalid675@gmail.com`) is in the git history of all
+  33 commits and becomes public with them. That is normal for GitHub and it is
+  your own account, but it is the kind of thing worth choosing rather than
+  discovering. GitHub's *Settings → Emails → Keep my email address private*
+  only affects future commits made through GitHub.
+- The demo site name `one-atlas-vwgf.atlassian.net` appears in the README, the
+  limits doc and the video footer. It is a throwaway Atlassian demo site and it
+  is the evidence that the runs were real, so it stays.
 
 Then, in the console:
 
