@@ -11,7 +11,8 @@ import {
   signatureOf,
   verifyQuotes,
 } from '../src/gate/evidence.js';
-import { SUPPRESS_REASON } from '../src/shared/contracts.js';
+import { RECEIPT_MARKER, SUPPRESS_REASON } from '../src/shared/contracts.js';
+import { renderReceipt } from '../src/gate/receipts.js';
 import { NOW, bundleFor, incident, openPack } from './helpers.js';
 
 test('canonicalJSON is independent of key insertion order', () => {
@@ -262,6 +263,54 @@ test('no quotes at all is not a failure', () => {
   const r = verifyQuotes([], b);
   assert.equal(r.verified, true);
   assert.equal(r.checked, 0);
+});
+
+test("Gatekeeper's own receipt comment does not change the evidence digest", () => {
+  // The bug that made the auto path structurally unreachable, found on the first
+  // live end-to-end run. Triage posts a "held" receipt; the receipt is a comment;
+  // the comment changed the bundle; the digest moved; and when the reviewer's
+  // verdict arrived, R03 rejected the pending proposal for citing a digest that
+  // no longer existed. The app invalidated its own proposal by recording it.
+  const before = bundleFor(incident(), {
+    comments: [{ author: '557058:abc', authorType: 'atlassian', body: 'A human said something.', createdAt: NOW }],
+  });
+
+  // Exactly what renderReceipt writes, via the shared marker.
+  const receiptComment = `${RECEIPT_MARKER}held*\n\nHeld by R04, R07: unattended action is switched off for CLSD`;
+  const after = bundleFor(incident(), {
+    comments: [
+      { author: '557058:abc', authorType: 'atlassian', body: 'A human said something.', createdAt: NOW },
+      { author: '712020:app-account-id', authorType: 'app', body: receiptComment, createdAt: NOW },
+    ],
+  });
+
+  assert.equal(after.digest, before.digest, 'posting a receipt must not invalidate a pending proposal');
+  assert.ok(
+    !after.items.some((i) => i.text.includes('Held by R04')),
+    'the receipt must not appear in the evidence bundle at all',
+  );
+});
+
+test('the receipt marker the renderer writes is the one the bundle filters on', () => {
+  // Two places have to agree exactly. If they drift, the digest starts moving
+  // again on every receipt and the auto path silently breaks a second time.
+  const rendered = renderReceipt(
+    {
+      seq: '000000',
+      issueKey: 'NW-1',
+      actor: 'gatekeeper:executor',
+      event: 'held',
+      evidenceDigest: 'a'.repeat(64),
+      rulePackVersion: 1,
+      action: null,
+      reason: 'because',
+      at: NOW,
+      prev: 'GENESIS',
+      digest: 'd'.repeat(64),
+    },
+    { outcomes: [] },
+  );
+  assert.ok(rendered.startsWith(RECEIPT_MARKER), `renderReceipt output must start with the marker, got: ${rendered.slice(0, 30)}`);
 });
 
 test('the bundle marks source and non-source items correctly', () => {

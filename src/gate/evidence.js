@@ -13,7 +13,7 @@
  */
 
 import { createHash } from 'node:crypto';
-import { SUPPRESS_REASON } from '../shared/contracts.js';
+import { RECEIPT_MARKER, SUPPRESS_REASON } from '../shared/contracts.js';
 
 /**
  * Canonical JSON: keys sorted at every depth, so two structurally identical
@@ -258,6 +258,20 @@ export function buildBundle({ incident, comments = [], linkedIssues = [], correl
   }
 
   comments.forEach((c, i) => {
+    // Gatekeeper's own receipt comments are not evidence and must not be in the
+    // bundle AT ALL — not merely flagged non-source.
+    //
+    // Found on the first live end-to-end run: triage posts a "held" receipt, the
+    // receipt lands as a comment, the bundle digest changes, and when the
+    // reviewer's verdict arrives R03 rejects the pending proposal because it
+    // "cites" a digest that no longer exists. The app invalidated its own
+    // proposal by writing down that it had made one, which made the auto path
+    // structurally unreachable.
+    //
+    // The receipt chain is the canonical history and agents read it with the
+    // read-receipts action, so nothing is lost by leaving it out here.
+    if (String(c.body || '').startsWith(RECEIPT_MARKER)) return;
+
     items.push({
       id: `comment:${i}`,
       kind: 'comment',

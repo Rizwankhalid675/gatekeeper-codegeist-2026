@@ -229,6 +229,18 @@ export const DISPOSITION = {
 
 export const GENESIS = 'GENESIS';
 
+/**
+ * The first characters of every receipt comment Gatekeeper posts.
+ *
+ * It is a shared constant because two places must agree on it exactly:
+ * renderReceipt writes it, and buildBundle uses it to keep our own receipts OUT
+ * of the evidence bundle. If they ever disagree, the bundle starts including our
+ * commentary, the digest moves every time we post a receipt, and every pending
+ * proposal is rejected under R03 — which is precisely the bug this constant
+ * exists to prevent.
+ */
+export const RECEIPT_MARKER = '*Gatekeeper \u00b7 ';
+
 export const RECEIPT_EVENT = {
   SUPPRESSED: 'suppressed',
   HELD: 'held',

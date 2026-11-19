@@ -13,7 +13,7 @@
  * in src/platform/store.js.
  */
 
-import { GENESIS, KEY, RECEIPT_EVENT } from '../shared/contracts.js';
+import { GENESIS, KEY, RECEIPT_EVENT, RECEIPT_MARKER } from '../shared/contracts.js';
 import { canonicalJSON, sha256 } from './evidence.js';
 
 /**
@@ -155,7 +155,7 @@ export function verifyChain(chain) {
 export function renderReceipt(receipt, verdict) {
   const firedRules = verdict.outcomes.filter((o) => o.fired);
   const lines = [
-    `*Gatekeeper · ${receipt.event}*`,
+    `${RECEIPT_MARKER}${receipt.event}*`,
     '',
     receipt.reason,
     '',
