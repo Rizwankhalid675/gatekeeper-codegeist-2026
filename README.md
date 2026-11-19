@@ -196,6 +196,7 @@ that would quietly change what the robot may do, and nobody would know which way
 | `jira:issuePanel` | [`console.jsx`](src/frontend/console.jsx) | UI Kit, `render: native` |
 | `jira:projectSettingsPage` | [`settings.jsx`](src/frontend/settings.jsx) | the rule pack editor |
 | Forge storage | [`src/platform/store.js`](src/platform/store.js) | rule packs, verdicts, receipts |
+| Five effects, all exercised live | [`src/platform/jira.js`](src/platform/jira.js) | comment, label and link on the auto path; assign by human override; transition verified refusing a name its workflow does not offer |
 | Jira REST v3 | [`src/platform/jira.js`](src/platform/jira.js) | the only module that talks to Jira, and the only five effects that exist |
 
 The agent prompts are worth reading as design artefacts rather than configuration:

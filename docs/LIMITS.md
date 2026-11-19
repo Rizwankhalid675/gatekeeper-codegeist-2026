@@ -99,6 +99,32 @@ names by triggering a failure. The settings page now says so; a better fix would
 list the workflow's real transitions in the editor, which needs an API the gate
 cannot reach from a pure function.
 
+### All five effects exercised live (19 Nov 2026)
+
+| Effect | Path | Result |
+|---|---|---|
+| `comment` | auto, after review | executed, receipt seq=000002 |
+| `label` | auto, after review | executed; `gatekeeper-incident` applied to CLSD-1 |
+| `link` | auto, after review | executed; CLSD-4 linked as a duplicate of CLSD-5 |
+| `assign` | human override from the panel | executed; CLSD-5 assigned, receipt `7feb0280799d...` |
+| `transition` | human override from the panel | **refusal path verified, success path not** |
+
+The transition effect was proven to do the right thing with a *wrong* name: it
+read the issue's real transitions, refused `In Progress`, and named `Start`. It
+has never completed a transition, because the rule pack's permitted values do not
+include `Start` and R02 would reject it.
+
+### Known gap: the rule pack's action allow-list is not editable in the UI
+
+The editor can switch unattended action on and off, change the confidence floor,
+and load the demo packs. It **cannot** edit an action's permitted values. For a
+product whose claim is "onboarding a team is authoring a rule pack, not changing
+code", that is the most important missing control — and it is why the transition
+success path could not be verified without editing code.
+
+`saveRulePack` already accepts and validates a whole pack, so the resolver side
+is done; this is a front end that does not exist yet.
+
 ### Known gap: only the REVIEWER's citations are verified
 
 R08 checks `review.quotes`. The proposing agent's `quotes` are parsed, stored and
