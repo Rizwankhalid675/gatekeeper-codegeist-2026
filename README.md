@@ -6,6 +6,14 @@ Built for **Codegeist 2026** · Category: **Apps for Software Teams** · Bonus: 
 
 **Install link:** _added at submission_ · **Demo video:** _added at submission_ · **Limits:** [what doesn't work yet](#honest-limits)
 
+**New for this hackathon.** Gatekeeper was written from scratch on Forge during the submission
+period. The architecture carries forward from an earlier project of mine that targeted a
+different platform and was never entered anywhere; no code is reused, and Codegeist's rules
+require the Forge rebuild in any case. `manifest.yml` has a Forge manifest and six Forge
+modules.
+
+**Node 22.x or 24.x.** The Forge CLI does not support Node 26 and warns on it.
+
 ---
 
 ## The problem, in one paragraph

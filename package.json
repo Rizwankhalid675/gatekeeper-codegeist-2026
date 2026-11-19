@@ -5,7 +5,7 @@
   "description": "Agentic incident triage for Jira Service Management: the model proposes, deterministic code decides, nothing executes without a receipt.",
   "type": "module",
   "engines": {
-    "node": ">=22"
+    "node": "22.x || 24.x"
   },
   "scripts": {
     "test": "node --test tests/*.test.js",
