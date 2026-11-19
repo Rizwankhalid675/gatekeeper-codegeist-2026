@@ -1,10 +1,10 @@
 # codegeist-2026
 
-**{{ONE_LINE}}**
+**Agentic incident triage for Jira Service Management: the model proposes, deterministic code decides, nothing executes without a receipt.**
 
-Built at codegeist-2026 · 2026-11-19 · Tracks: {{TRACKS}}
+Built at codegeist-2026 · 2026-11-19 · Tracks: Apps for Software Teams + Best Agents (rovo:agent) + Best app with Atlassian MCP
 
-**Live:** {{LIVE_URL}} · **Demo:** [90-second walkthrough](#the-90-second-demo) · **Limits:** [what doesn't work yet](#honest-limits)
+**Live:** _not deployed yet_ · **Demo:** [90-second walkthrough](#the-90-second-demo) · **Limits:** [what doesn't work yet](#honest-limits)
 
 ![screenshot](docs/img/hero.png)
 
@@ -14,17 +14,18 @@ Built at codegeist-2026 · 2026-11-19 · Tracks: {{TRACKS}}
 
 | Criterion | Points | How we meet it | Where to see it |
 |---|---:|---|---|
-| {{CRITERION_1}} | {{PTS_1}} | | §1 |
-| {{CRITERION_2}} | {{PTS_2}} | | §2 |
-| {{CRITERION_3}} | {{PTS_3}} | | §3 |
-| {{CRITERION_4}} | {{PTS_4}} | | §4 |
+| Technological Implementation | 20% | | §1 |
+| Design | 20% | | §2 |
+| Potential Impact | 20% | | §3 |
+| Innovation/Idea | 20% | | §4 |
+| Presentation | 20% | | §5 |
 
 > Replace every cell with a specific, checkable claim and a link to where the judge can verify it.
 > If a cell says something vague like "great UX", you have lost those points already.
 
 ---
 
-## 1. {{CRITERION_1}} ({{PTS_1}} pts)
+## 1. Technological Implementation (20% pts)
 
 ### The problem, in numbers
 
@@ -42,7 +43,7 @@ Built at codegeist-2026 · 2026-11-19 · Tracks: {{TRACKS}}
 
 ---
 
-## 2. {{CRITERION_2}} ({{PTS_2}} pts)
+## 2. Design (20% pts)
 
 ### Architecture
 
@@ -73,18 +74,24 @@ _Measured, with provenance. No adjectives._
 
 ---
 
-## 3. {{CRITERION_3}} ({{PTS_3}} pts)
+## 3. Potential Impact (20% pts)
 
 ---
 
-## 4. {{CRITERION_4}} ({{PTS_4}} pts)
+## 4. Innovation/Idea (20% pts)
+
+---
+
+## 5. Presentation (20%)
+
+See [VIDEO.md](../VIDEO.md) for the beat sheet.
 
 ---
 
 ## Track requirements
 
-- **{{TRACK_1}}:** how we satisfy it, and the file that proves it
-- **{{TRACK_2}}:** how we satisfy it, and the file that proves it
+- **Forge platform + at least one Atlassian product:** how we satisfy it, and the file that proves it
+- **rovo:agent module for the Best Agents bonus:** how we satisfy it, and the file that proves it
 
 ## Sponsor tech, in detail
 
