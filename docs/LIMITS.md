@@ -76,7 +76,32 @@ There is no outage; the model invented one. The gate held it under R04 and R07
 regardless, which is precisely the argument: the confidence floor would not have
 caught this, because the model was confident and wrong.
 
-### OPEN, and submission-blocking: the rule pack editor is unreachable
+### The full path is now verified end to end (19 Nov 2026)
+
+On `one-atlas-vwgf.atlassian.net`, through the real Rovo agents:
+
+| Step | Result |
+|---|---|
+| Panel renders live evidence with a stable digest | works |
+| Agent proposes via `triage-incident` | works |
+| Gate holds under R04 + R07 with unattended off | works |
+| Rule pack editor switches CLSD to northwind (unattended on) | works |
+| Gate then holds under R07 alone, pending review | works |
+| Reviewer confirms via `review-proposal` | works |
+| **All eleven rules pass, action executes, receipt seq=000002** | **works** |
+
+Still untested: the `transition` and `assign` effects. Only `comment` has
+actually run against Jira; the other four effects in the executor's map have
+never been exercised live, and transition names in particular are per-workflow.
+
+### RESOLVED: the rule pack editor is now reachable
+
+`jira:projectSettingsPage` never appears in the new JSM "Space settings"
+navigation. `jira:globalPage` does appear, under Apps in the main navigation,
+and the editor now lives there with a project picker (a global page has no
+project in its context).
+
+### The old entry, kept for the record: the editor was unreachable
 
 `jira:projectSettingsPage` is documented as working in Jira Service Management,
 and `forge lint` accepts it, but on a current demo site it does **not** appear in
