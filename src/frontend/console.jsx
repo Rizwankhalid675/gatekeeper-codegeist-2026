@@ -46,7 +46,7 @@ function Verdict({ verdict, stale }) {
     return (
       <SectionMessage title="Nothing decided yet">
         <Text>
-          Ask the Gatekeeper agent to triage this issue. Correlation and the eleven-rule gate run before anything is
+          Ask the Gatekeeper agent to triage this issue. Correlation and the twelve-rule gate run before anything is
           touched.
         </Text>
       </SectionMessage>
@@ -97,11 +97,19 @@ function Verdict({ verdict, stale }) {
       ) : null}
 
       {/* The rules that PASSED are shown too. An operator looking at a hold
-          needs to see that the other ten cleared, or they cannot tell a
-          specific objection from a blanket refusal. */}
+          needs to see that the others cleared, or they cannot tell a specific
+          objection from a blanket refusal.
+
+          The denominator counts the outcomes actually in this verdict rather
+          than a literal. A hardcoded 11 survived the twelfth rule being added
+          and read "10 of 11" under a verdict carrying twelve — which is the
+          one number on this panel an auditor would use to check that nothing
+          had been quietly dropped. */}
       <Stack space="space.050">
         <Text>
-          <Strong>Rules that passed ({passed.length} of 11)</Strong>
+          <Strong>
+            Rules that passed ({passed.length} of {verdict.outcomes.length})
+          </Strong>
         </Text>
         {passed.map((o) => (
           <Text key={o.rule}>

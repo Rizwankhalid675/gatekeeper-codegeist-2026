@@ -162,7 +162,7 @@ export function renderReceipt(receipt, verdict) {
     `* action: ${receipt.action ? `\`${receipt.action.id}\`` : '_none_'}`,
     `* evidence: \`${receipt.evidenceDigest.slice(0, 12)}\``,
     `* rule pack: v${receipt.rulePackVersion}`,
-    `* rules fired: ${firedRules.length ? firedRules.map((o) => o.rule).join(', ') : 'none — all eleven passed'}`,
+    `* rules fired: ${firedRules.length ? firedRules.map((o) => o.rule).join(', ') : 'none — all twelve passed'}`,
     `* actor: ${receipt.actor}`,
     `* receipt: \`${receipt.digest.slice(0, 12)}\` (prev \`${receipt.prev.slice(0, 12)}\`)`,
   ];

@@ -5,28 +5,28 @@ because a judge who finds a weakness you did not name stops believing the rest,
 and because the thesis of this project is that unfalsifiable safety claims are
 worthless.
 
-Last updated 19 Nov 2026, after the first successful deploy.
+Last updated 19 Nov 2026, after rules R12 and the rule pack editor landed.
 
 ## Not verified against a live Atlassian site
 
-**This is the big one.** All 119 tests run against fakes at the Jira seam. What has
-actually been verified:
+**This was the big one, and it is now largely settled** — the sections below are
+kept in the order they were written, because what was unverified when, and what
+the first real run broke, is the most useful thing in this document.
 
 | | Status |
 |---|---|
-| The gate, executor, receipt chain, correlation, quote verification | tested, 119 tests, no network |
+| The gate, executor, receipt chain, correlation, quote verification | tested, 150 tests, no network |
 | `manifest.yml` structure, resource files, YAML validity | verified by the real `forge lint` — **no issues found** |
 | Manifest cross-references against the code | verified by `tests/manifest.test.js` |
-| `forge deploy` | **done** — v2.1.0 on the development environment, lint clean |
-| Jira REST calls in `src/platform/jira.js` | **never executed** |
-| A real Rovo conversation invoking the actions | **never happened** |
-| `forge install` into a site | **not yet run** |
+| `forge deploy` | **done** — lint clean on every deploy since v2.1.0 |
+| Jira REST calls in `src/platform/jira.js` | **exercised live** — all five effects, on a real site |
+| A real Rovo conversation invoking the actions | **done** — both agents, end to end |
+| `forge install` into a site | **done** — `one-atlas-vwgf.atlassian.net` |
 
-The app now deploys with a clean lint, which rules out a whole class of
-structural problem. It rules out nothing about the Jira integration: deploying
-means the code was accepted, not that a single request to Jira has ever been
-made. Treat `src/platform/jira.js` as unverified until an issue has actually
-been triaged in a real site.
+What remains unverified is narrower and is listed at the end: scale, a real
+incident queue, anything measured rather than demonstrated, and any site whose
+workflow differs from the one tested. The 150 tests still run against fakes at
+the Jira seam, so they remain a check on the logic and not on the integration.
 
 Two manifest errors only the real linter found, recorded because neither is in
 the documentation: strings are capped at **255 characters**, and when one
@@ -133,20 +133,101 @@ One sharp edge is now called out in the UI rather than left implicit: **an empty
 permitted-values box means ANY value**, because R02 only restricts an action that
 has values. Clearing the box opens the action up rather than locking it down.
 
-The editor still cannot add or remove actions, only configure the ones the pack
-already defines.
+The editor can now **add and remove** actions, not only configure the ones the
+pack already defines. Two asymmetries are deliberate:
 
-### Known gap: only the REVIEWER's citations are verified
+- Removing takes one click. It narrows what any agent may propose — R01 refuses
+  the id from the next version on — so it is the conservative direction.
+- Adding validates first, and a new action arrives **capped at `hold`** with no
+  permitted values. Clearing it for unattended use is a separate, deliberate
+  click. The effect is chosen from the executor's five, not typed.
 
-R08 checks `review.quotes`. The proposing agent's `quotes` are parsed, stored and
-shown in the panel, but nothing verifies them. On CLSD-3 the proposer cited a
-line from the chat conversation rather than from the issue evidence, and no rule
-objected — because no rule looks.
+`parseRulePack` was tightened to match, because an administrator typing at 5pm is
+a different threat model from a developer editing a seed file: an unknown
+`effect`, a missing `title`, a non-boolean `reversible` (where the string
+`"false"` is truthy and would defeat R10) and a non-string `allowedValues` are
+now all refused at save time rather than discovered at execution time. Twelve
+tests in `tests/rulepack.test.js` cover it, including that nothing is written to
+storage when validation fails.
 
-This is narrower than it sounds (the proposer's quotes do not authorise anything;
-the reviewer's are what R08 gates) but the README should not be read as saying
-every quote is checked. Verifying the proposer's quotes too would be a small
-change to `decide()` and is the obvious next hardening step.
+Removing every action is allowed and leaves a legitimate posture: Gatekeeper
+still correlates, diagnoses and holds, and R01 refuses every action proposed.
+The editor says so on screen rather than looking broken.
+
+### RESOLVED: the proposer's citations are verified too (rule R12)
+
+The gap, for the record: R08 checked `review.quotes` only. The proposing agent's
+`quotes` were parsed, stored and shown in the panel, but nothing verified them.
+On CLSD-3 the proposer cited a line from the chat conversation rather than from
+the issue evidence and no rule objected, because no rule looked.
+
+**R12** now applies the same deterministic check to the proposer, against source
+evidence only, and holds when a citation is not there. It holds rather than
+rejects for the same reason R08 does: the proposal may still be right about the
+incident while being wrong about what the evidence says, and a human reading the
+hold can see both the claim and the quote that does not exist.
+
+Two notes on the design:
+
+- **R12 is numbered last, not inserted beside R08.** Rule ids are append-only:
+  every receipt already written names the rules that fired as bare ids, so
+  renumbering R09–R11 would silently change what the existing audit trail says
+  happened.
+- **A careful reviewer cannot launder a fabricating proposer.** R08 and R12 are
+  independent, so an honest reviewer citation leaves R08 green while R12 still
+  holds the action. There is a test for exactly that, because it is the failure
+  the two-agent design exists to catch.
+
+What this still does not do: it verifies that a quote *appears* in the source
+evidence, not that the quote supports the conclusion drawn from it. An agent may
+quote a real line and reason badly from it, and no rule here objects.
+
+### What the R12 deploy found live (19 Nov 2026)
+
+Three defects, none of which any of the 152 tests could have caught, all found
+by using the thing rather than reading it.
+
+**1. R12 caught a real fabrication on its first live run — on an action that had
+already executed under the old gate.** CLSD-2 reads, in full: summary "Issue
+xyz", description "issue with this thing". The proposer had cited:
+
+> "Critical failure in production database connection pool."
+> "Configuration mismatch following recent deployment."
+
+Neither sentence exists anywhere in the issue. Under the eleven-rule gate that
+proposal passed every rule, reached `auto`, and **executed** — receipt 000002.
+That receipt is still on the issue, which is the honest way to leave it. The
+re-run under R12:
+
+    hold  Held by R07, R12: no adversarial review on the record;
+          nothing runs unattended without one
+
+    R12  Proposal citations appear in source evidence
+         — 1 of 1 citation(s) are not in the source evidence: "CLSD-2"
+
+This is the strongest evidence in the project that the rule was worth adding: it
+did not catch a fabrication somebody staged for it, it caught one already in the
+audit trail.
+
+**2. A controlled `Textfield` in UI Kit loses keystrokes.** Typing
+`escalate-to-vendor` into the new action-id field produced `!`. A controlled
+field re-renders through the iframe bridge on every keystroke and snaps back to
+the state it was handed, so typing outruns the round trip. The fields are now
+uncontrolled (`defaultValue`, cleared by changing a `key`).
+
+The same shape was in the confidence floor field, where it was worse: it saved on
+every keystroke, so typing "0.9" would have written three rule pack versions and
+left the floor at **0** in between — an interval in which every proposal clears
+R06. It now saves once, on blur.
+
+**3. The panel's rule count was a literal.** `Rules that passed ({passed} of 11)`
+read "10 of 11" under a verdict carrying twelve outcomes. That denominator is
+exactly the number an auditor would use to check that no rule had been quietly
+dropped, so it is now derived from `verdict.outcomes.length`. There is a test
+forbidding the literal.
+
+All three are the same lesson as the SigV4 and accountId defects before them: a
+local test validates the code against your model of the platform.
 
 ### RESOLVED: the blank issue panel (and why the bisect mattered)
 
@@ -206,9 +287,10 @@ On `one-atlas-vwgf.atlassian.net`, through the real Rovo agents:
 | Reviewer confirms via `review-proposal` | works |
 | **All eleven rules pass, action executes, receipt seq=000002** | **works** |
 
-Still untested: the `transition` and `assign` effects. Only `comment` has
-actually run against Jira; the other four effects in the executor's map have
-never been exercised live, and transition names in particular are per-workflow.
+*(Superseded: when this was written only `comment` had run against Jira. All five
+effects have since been exercised live — see "All five effects exercised live"
+above. The paragraph is kept because the order in which things were verified is
+part of the record.)*
 
 ### RESOLVED: the rule pack editor is now reachable
 
@@ -317,6 +399,9 @@ generator rather than the system.
   failed attempt (`RECEIPT_EVENT.FAILED`). It does not cover a Jira call that
   succeeded while the response was lost in transit; that would be recorded as
   failed when it actually happened.
-- "119 tests" — a count, not a coverage figure. The front end has no tests at
-  all; it is deliberately logic-free, but "deliberately logic-free" is an
-  assertion about code nobody has tested.
+- "150 tests" — a count, not a coverage figure. The front end has nine, and they
+  are deliberately crude string checks on the source rather than rendering
+  tests: they catch the `DynamicTable head` shape that blanked the whole panel,
+  an unhandled `invoke()` rejection, and a component imported from `@forge/react`
+  that the installed package does not export. Nothing here renders a component,
+  so "the panel works" is still a claim backed by looking at it, not by a test.

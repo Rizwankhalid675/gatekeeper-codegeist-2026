@@ -55,7 +55,7 @@ modules:
       actionVerb: CREATE
       description: >-
         Run the Gatekeeper pipeline on one Jira issue: gather evidence,
-        correlate against recent issues, run the eleven-rule policy gate, then
+        correlate against recent issues, run the twelve-rule policy gate, then
         execute the proposed action or hold it for a human. Always writes a
         receipt.
       inputs:

@@ -300,12 +300,12 @@ test('a missing issueKey is refused everywhere', async () => {
 
 // --- read-only actions ------------------------------------------------------
 
-test('explain-verdict reports all eleven rules, passed and fired', async () => {
+test('explain-verdict reports all twelve rules, passed and fired', async () => {
   const deps = await withOpenPack(fakeDeps());
   await runTriage(deps, goodProposal);
 
   const result = await runExplain(deps, { issueKey: 'NW-101' });
-  assert.equal(result.rules.length, 11);
+  assert.equal(result.rules.length, 12);
   assert.ok(result.rules.some((r) => r.fired));
   assert.ok(result.rules.some((r) => !r.fired));
   for (const r of result.rules) assert.ok(r.detail, `${r.rule} must explain itself`);

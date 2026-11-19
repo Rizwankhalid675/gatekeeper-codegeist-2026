@@ -43,8 +43,8 @@ Three trust levels, and they are the architecture:
 
 | Criterion | How we meet it | Where to see it |
 |---|---|---|
-| Technological Implementation | Two Rovo agents with separated duties, an eleven-rule gate that is a pure function, an executor that re-derives its own authorisation, and a sha256 receipt chain. 119 tests, no Forge runtime needed to run them. | [`src/gate/gate.js`](src/gate/gate.js), [`src/executor.js`](src/executor.js), `npm test` |
-| Design | A finished product surface, not a proof of concept: the console shows the evidence, the agent handoff, **all eleven rules including the ones that passed**, and the receipt chain with its verification state. A project settings page where onboarding a team is authoring a rule pack. | [`src/frontend/console.jsx`](src/frontend/console.jsx), [`src/frontend/settings.jsx`](src/frontend/settings.jsx) |
+| Technological Implementation | Two Rovo agents with separated duties, a twelve-rule gate that is a pure function, an executor that re-derives its own authorisation, and a sha256 receipt chain. 150 tests, no Forge runtime needed to run them. | [`src/gate/gate.js`](src/gate/gate.js), [`src/executor.js`](src/executor.js), `npm test` |
+| Design | A finished product surface, not a proof of concept: the console shows the evidence, the agent handoff, **all twelve rules including the ones that passed**, and the receipt chain with its verification state. A project settings page where onboarding a team is authoring a rule pack. | [`src/frontend/console.jsx`](src/frontend/console.jsx), [`src/frontend/settings.jsx`](src/frontend/settings.jsx) |
 | Potential Impact | The failure mode this addresses is specific and current: teams are being asked to let agents act on production incidents, with "the model said so" as the audit trail. Gatekeeper is a shape for doing it that an administrator can actually sign off. | §1 below, [`docs/LIMITS.md`](docs/LIMITS.md) |
 | Innovation/Idea | The reviewer's citations are re-verified against **source evidence only**, so one agent cannot corroborate another by quoting it back. A fabricated citation is detected and holds the action. Most entries in this space ask you to trust the model more; this one is built to be trusted less. | [`verifyQuotes`](src/gate/evidence.js), rule R08 |
 | Presentation | One unbroken demo path, scripted beat by beat, with the fabricated-citation hold as the centrepiece. | [`VIDEO.md`](VIDEO.md), [`DEMO-RUNBOOK.md`](DEMO-RUNBOOK.md) |
@@ -81,8 +81,8 @@ Jira issue
     │
     ▼
 ┌─────────────────────────────────────────────┐
-│ POLICY GATE — 11 rules, pure function       │  R01-R03 reject · R04-R11 hold
-│ reject · hold · auto                        │  all eleven reported, every time
+│ POLICY GATE — 12 rules, pure function       │  R01-R03 reject · R04-R12 hold
+│ reject · hold · auto                        │  all twelve reported, every time
 └─────────────────────────────────────────────┘
     │
     ▼
@@ -95,9 +95,9 @@ Jira issue
   sha256 receipt chain + a comment on the issue
 ```
 
-### The eleven rules
+### The twelve rules
 
-Three reject, eight hold. The gate can only ever make the outcome **more** conservative than
+Three reject, nine hold. The gate can only ever make the outcome **more** conservative than
 the agent asked for — there is no input that escalates one.
 
 | | Rule | Fires when | Forces |
@@ -109,14 +109,25 @@ the agent asked for — there is no input that escalates one.
 | R05 | Action is cleared for unattended use | the admin capped this action at `hold` | hold |
 | R06 | Confidence at or above the floor | the model admitted uncertainty | hold |
 | R07 | Adversarial reviewer confirms | the reviewer dissented, **or nothing reviewed it** | hold |
-| R08 | Citations appear in source evidence | a quote was fabricated | hold |
+| R08 | Reviewer citations appear in source evidence | the reviewer fabricated a quote | hold |
 | R09 | Priority does not mandate a human | e.g. Highest always goes to a person | hold |
 | R10 | Action is reversible | the action cannot be undone | hold |
 | R11 | Not inside a maintenance window | planned work is in progress | hold |
+| R12 | Proposal citations appear in source evidence | the proposing agent fabricated a quote | hold |
 
 Why R07 fires on a *missing* review and not just a dissent: passing an unreviewed proposal
 would make the reviewer decorative. The one case where review gets skipped is the case where
 nothing checked the proposal at all.
+
+Why R12 is numbered last rather than sitting beside R08, where it belongs: rule ids are
+**append-only**. Every receipt already written names the rules that fired as bare ids, so
+renumbering R09–R11 to make room would silently change what the existing audit trail says
+happened. A gap in the logical ordering costs a reader a moment; a chain of receipts that now
+reads wrong costs the whole point of having one.
+
+R08 and R12 are the same check pointed at the two different agents. R08 came first and left
+the obvious hole: it verified the reviewer's citations and took the proposer's on trust, which
+is backwards — the proposer is the one asking for an effect on a real issue.
 
 ### The part that is genuinely different
 
@@ -215,17 +226,19 @@ that confirming everything is worse than not reviewing at all.
 ## 4. Tests
 
 ```bash
-npm test      # 119 tests, no Forge runtime, no network, no credentials
+npm test      # 150 tests, no Forge runtime, no network, no credentials
 ```
 
 | File | Tests | Covers |
 |---|---:|---|
-| `tests/evidence.test.js` | 22 | canonical digests, correlation precedence, quote verification |
-| `tests/gate.test.js` | 26 | all eleven rules, precedence, determinism, malformed model output |
+| `tests/evidence.test.js` | 26 | canonical digests, correlation precedence, quote verification |
+| `tests/gate.test.js` | 32 | all twelve rules, precedence, determinism, malformed model output |
 | `tests/receipts.test.js` | 15 | the chain, and four distinct ways of tampering with it |
 | `tests/executor.test.js` | 14 | forged, stale and replayed verdicts; human override |
 | `tests/pipeline.test.js` | 24 | the two-agent handoff end to end, with Jira faked at the seam |
 | `tests/manifest.test.js` | 18 | the manifest cross-referenced against the code |
+| `tests/rulepack.test.js` | 12 | what an administrator is allowed to author, refused at save time |
+| `tests/frontend.test.js` | 9 | the static checks for the three ways this panel rendered blank |
 
 `tests/manifest.test.js` exists because `forge lint` needs an Atlassian login and so cannot run
 on a fresh clone. It catches the class of mistake lint would not catch anyway — a
@@ -281,7 +294,7 @@ Start with [`AGENTS.md`](AGENTS.md).
 | Need | Where |
 |---|---|
 | Contracts and shared types | [`src/shared/contracts.js`](src/shared/contracts.js) — frozen |
-| The eleven rules | [`src/gate/gate.js`](src/gate/gate.js) |
+| The twelve rules | [`src/gate/gate.js`](src/gate/gate.js) |
 | Quote verification | [`src/gate/evidence.js`](src/gate/evidence.js) |
 | The only code that writes to Jira | [`src/platform/jira.js`](src/platform/jira.js) |
 | Forge entry point (wiring only) | [`src/index.js`](src/index.js) |
@@ -296,7 +309,7 @@ Named here before a judge finds them. See [`docs/LIMITS.md`](docs/LIMITS.md) for
   development environment with `forge lint` reporting no issues, which rules out a class of
   structural problem. It rules out nothing about Jira: not one request in
   `src/platform/jira.js` has ever executed, and no Rovo conversation has happened. Every one of
-  the 119 tests runs against fakes at the Jira seam. Experience says the first live run finds
+  the 150 tests runs against fakes at the Jira seam. Experience says the first live run finds
   things no local test can.
 - **Forge storage has no compare-and-swap.** Two concurrent appends to one issue's receipt
   chain could collide and produce a duplicate sequence number. `verifyChain` detects the damage;

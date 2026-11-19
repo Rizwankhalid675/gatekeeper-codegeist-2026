@@ -6,22 +6,29 @@
  * argument. Give it the same inputs and it returns the same verdict, byte for
  * byte, which is what makes the receipt chain worth anything.
  *
- * Eleven rules. All eleven are evaluated on every decision, including the ones
- * that do not fire, and all eleven appear in the verdict. That is not for show:
+ * Twelve rules. All twelve are evaluated on every decision, including the ones
+ * that do not fire, and all twelve appear in the verdict. That is not for show:
  * an operator reading a held incident needs to see the rules that *passed* to
  * know the hold was specific rather than a blanket refusal, and a rule that
  * silently stops being evaluated is the classic way a safety check rots.
  *
- * Precedence: REJECT beats HOLD beats AUTO. Rules R01–R03 reject; R04–R11 hold.
+ * Precedence: REJECT beats HOLD beats AUTO. Rules R01–R03 reject; R04–R12 hold.
  * Nothing here can escalate a proposal — the gate can only ever make the
  * outcome more conservative than the agent asked for.
+ *
+ * Rule ids are APPEND-ONLY. R12 checks the proposer's citations and belongs
+ * beside R08, which checks the reviewer's, but it is numbered last rather than
+ * inserted there: every receipt already written names the rules that fired as
+ * bare ids, so renumbering R09–R11 would silently change what the existing
+ * audit trail says happened. A gap in the logical ordering is a much smaller
+ * cost than a chain of receipts that now reads wrong.
  */
 
 import { DISPOSITION } from '../shared/contracts.js';
 import { verifyQuotes } from './evidence.js';
 
 /** The rule ids, in evaluation order, so tests can assert the set is intact. */
-export const RULE_IDS = ['R01', 'R02', 'R03', 'R04', 'R05', 'R06', 'R07', 'R08', 'R09', 'R10', 'R11'];
+export const RULE_IDS = ['R01', 'R02', 'R03', 'R04', 'R05', 'R06', 'R07', 'R08', 'R09', 'R10', 'R11', 'R12'];
 
 /**
  * @param {object} args
@@ -228,6 +235,35 @@ export function decide({ proposal, review = null, bundle, rulePack, now }) {
     DISPOSITION.HOLD,
   );
 
+  // -- R12 -----------------------------------------------------------------
+  // The same citation check as R08, applied to the agent that wants to act.
+  //
+  // R08 alone left the obvious hole: it checked the reviewer's quotes and took
+  // the proposer's on faith. A proposer is the one asking for an effect on a
+  // real issue, so a fabricated citation there is the more consequential of the
+  // two — it is the model manufacturing the grounds for its own action.
+  //
+  // This holds rather than rejects, for the same reason R08 does: the proposal
+  // may still be right about the incident even where it was wrong about what
+  // the evidence says, and a human reading the hold can see both the claim and
+  // the quote that does not exist.
+  const proposerQuotes = proposal ? verifyQuotes(proposal.quotes, bundle) : { verified: true, unverified: [], checked: 0 };
+  const proposerFabricated = !proposerQuotes.verified;
+  add(
+    'R12',
+    'Proposal citations appear in source evidence',
+    proposerFabricated,
+    proposal
+      ? proposerFabricated
+        ? `${proposerQuotes.unverified.length} of ${proposerQuotes.checked} citation(s) are not in the source evidence: ` +
+          proposerQuotes.unverified.map((q) => JSON.stringify(trim(q))).join(', ')
+        : proposerQuotes.checked === 0
+          ? 'the agent cited nothing, so there was nothing to fabricate'
+          : `${proposerQuotes.checked} citation(s) verified against source evidence`
+      : 'no proposal to check',
+    DISPOSITION.HOLD,
+  );
+
   // -- resolve -------------------------------------------------------------
   const fired = outcomes.filter((o) => o.fired && o.forces);
   const rejecting = fired.filter((o) => o.forces === DISPOSITION.REJECT);
@@ -250,7 +286,7 @@ export function decide({ proposal, review = null, bundle, rulePack, now }) {
     reason = `Held by ${holding.map((o) => o.rule).join(', ')}: ${holding[0].detail}`;
   } else {
     disposition = DISPOSITION.AUTO;
-    reason = `All eleven rules passed; "${action.id}" may run unattended.`;
+    reason = `All twelve rules passed; "${action.id}" may run unattended.`;
   }
 
   return {

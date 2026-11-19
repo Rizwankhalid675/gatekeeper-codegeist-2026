@@ -130,7 +130,7 @@ model proposes, deterministic code decides, and nothing executes without a recei
   and downgrades the verdict to a hold.
 
 Carried over from the NightShift build (same author, new codebase on Forge): the architecture,
-the eleven-rule gate design, the quote-verification idea, and the honest-limits discipline.
+the twelve-rule gate design, the quote-verification idea, and the honest-limits discipline.
 Nothing is copied — Forge is a different runtime and the rules require the Forge rebuild.
 
 ## 9. Enrol

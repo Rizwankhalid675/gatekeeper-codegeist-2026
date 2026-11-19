@@ -165,7 +165,7 @@ test('the rendered comment names the rules that fired, so an operator can audit 
   assert.match(text, /prev/);
 });
 
-test('a clean verdict renders as all eleven passing, not as a blank', () => {
+test('a clean verdict renders as all twelve passing, not as a blank', () => {
   const bundle = bundleFor();
   const verdict = decide({ proposal: proposalFor(bundle), review: reviewConfirm(), bundle, rulePack: openPack(), now: NOW });
   const receipt = {
@@ -174,5 +174,5 @@ test('a clean verdict renders as all eleven passing, not as a blank', () => {
     prev: GENESIS,
     digest: 'd'.repeat(64),
   };
-  assert.match(renderReceipt(receipt, verdict), /all eleven passed/);
+  assert.match(renderReceipt(receipt, verdict), /all twelve passed/);
 });

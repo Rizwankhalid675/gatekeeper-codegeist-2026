@@ -331,7 +331,7 @@ export async function runExplain(deps, input) {
     reason: verdict.reason,
     rulePackVersion: verdict.rulePackVersion,
     decidedAt: verdict.decidedAt,
-    // All eleven, passed and fired. An operator reading a hold needs to see
+    // All twelve, passed and fired. An operator reading a hold needs to see
     // which rules cleared to know the hold was specific.
     rules: verdict.outcomes.map((o) => ({ rule: o.rule, title: o.title, fired: o.fired, detail: o.detail })),
   };
@@ -397,7 +397,7 @@ export async function runDescribeRulePack(deps, input) {
       allowedValues: a.allowedValues,
     })),
     note: pack.unattendedAllowed
-      ? 'Unattended action is enabled for this project. Actions still pass all eleven rules first.'
+      ? 'Unattended action is enabled for this project. Actions still pass all twelve rules first.'
       : 'Unattended action is switched OFF for this project. Every proposal is held for a human.',
   };
 }

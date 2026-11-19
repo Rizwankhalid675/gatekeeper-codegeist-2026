@@ -142,6 +142,24 @@ export const DISPOSITION = {
 };
 
 /**
+ * The five effects, and only these five. There is no path from an agent's
+ * output to an arbitrary Jira call: an action names one of these, the executor
+ * dispatches on it, and anything else is refused.
+ *
+ * Named here rather than only in the executor's switch because the rule pack
+ * editor can now author actions, and an effect typo should be refused when an
+ * administrator saves it — not discovered at 3am when the executor reaches an
+ * action it cannot perform.
+ */
+export const EFFECT = {
+  COMMENT: 'comment',
+  TRANSITION: 'transition',
+  ASSIGN: 'assign',
+  LINK: 'link',
+  LABEL: 'label',
+};
+
+/**
  * One permitted action. `maxDisposition` is a ceiling: an action marked HOLD can
  * never be auto-executed however confident the model is, and that ceiling is
  * re-read by the executor at execution time rather than trusted from a verdict.
@@ -203,7 +221,7 @@ export const DISPOSITION = {
  * @property {number} rulePackVersion
  * @property {string} evidenceDigest
  * @property {ProposedAction|null} action
- * @property {RuleOutcome[]} outcomes  every rule, fired or not. Eleven, always.
+ * @property {RuleOutcome[]} outcomes  every rule, fired or not. Twelve, always.
  * @property {string} reason           the single sentence a human reads first
  * @property {string} decidedAt        ISO
  */
@@ -345,6 +363,29 @@ export function parseRulePack(v) {
     if (typeof a?.id !== 'string' || !a.id) return { ok: false, error: 'every action needs an id' };
     if (a.maxDisposition !== DISPOSITION.HOLD && a.maxDisposition !== DISPOSITION.AUTO) {
       return { ok: false, error: `action ${a.id}: maxDisposition must be hold or auto` };
+    }
+    // An unknown effect is an action that can be proposed, pass all twelve
+    // rules, and then fail in the executor with nothing a human asked for
+    // having happened. Refuse it at the point somebody wrote it down.
+    if (!Object.values(EFFECT).includes(a.effect)) {
+      return {
+        ok: false,
+        error: `action ${a.id}: effect must be one of ${Object.values(EFFECT).join(', ')} (got ${JSON.stringify(a.effect)})`,
+      };
+    }
+    if (typeof a.title !== 'string' || !a.title.trim()) {
+      return { ok: false, error: `action ${a.id}: needs a title a human can read in a hold` };
+    }
+    // Absent means reversible, which is the lenient reading — so require the
+    // field to be a boolean when present rather than letting a string "false"
+    // silently count as true and defeat R10.
+    if (a.reversible !== undefined && typeof a.reversible !== 'boolean') {
+      return { ok: false, error: `action ${a.id}: reversible must be true or false` };
+    }
+    if (a.allowedValues !== undefined) {
+      if (!Array.isArray(a.allowedValues) || a.allowedValues.some((v) => typeof v !== 'string')) {
+        return { ok: false, error: `action ${a.id}: allowedValues must be an array of strings` };
+      }
     }
   }
   const ids = o.actions.map((a) => a.id);

@@ -11,6 +11,31 @@ required to watch beyond five minutes." **Target 4:30.**
 > better and entirely unscripted — see below. Every beat here is a thing that
 > actually happened on `one-atlas-vwgf.atlassian.net`, not a thing we hope will.
 
+## Re-shoot the beat frames before recording
+
+`docs/img/beats/02-*` and `04-*` were captured against the **eleven**-rule gate
+and show "11 of 11". The gate now has twelve rules and the panel derives the
+count, so those frames contradict the current build. Re-capture them in the take.
+
+## A stronger opener than the one below (19 Nov, after R12 landed)
+
+CLSD-2 reads, in full: summary "Issue xyz", description "issue with this thing".
+The proposer cited:
+
+> "Critical failure in production database connection pool."
+> "Configuration mismatch following recent deployment."
+
+Neither sentence exists. Under the old gate that proposal passed every rule,
+reached `auto`, and **executed** — the receipt is still on the issue. Under R12
+it is held, and the rule says why: `1 of 1 citation(s) are not in the source
+evidence`.
+
+That is a better 0:00 than the CLSD-1 beat below, because the before and after
+are both real and both on the record: the same issue, the same app, one rule
+apart. Say it in one sentence — "this already happened; here is the rule that
+would have stopped it" — then cut to the held verdict.
+`docs/img/beats/05-r12-holds-fabricated-citation.jpg` is the frame.
+
 ## The spine: the model was confident and wrong, and it didn't matter
 
 Asked to triage **CLSD-1** — a legal question about export sanctions, reading
@@ -38,7 +63,7 @@ fabricated-quote beat because nobody set it up. Open with it.
 | 1:05–1:35 | "Before any model is asked anything, correlation runs. It's deterministic. Duplicates, flapping, maintenance windows, known-benign signatures — closed with a written reason. No tokens spent." | the evidence section, `paged`, signature, digest |
 | 1:35–2:10 | "When a model is involved, this is what it may do." Open the rule pack editor. "Five actions, written by an administrator. An action id that isn't on this list is refused by rule R01 before anything happens. And each one has a ceiling: this one may run unattended, this one is always a human." | the editor, the per-action toggles |
 | 2:10–2:45 | "Watch the ceiling work. I ask it to move an issue through the workflow. All the other rules pass — but R05 says this action is capped at hold, so it's held for a person. A confirming review wouldn't lift it. That's the knob a team actually turns." | CLSD-3 held under R05, nine rules green |
-| 2:45–3:20 | "Two agents, not one. The reviewer has a different prompt and is never told how confident the proposer was. Nothing runs unattended until a review is on the record — that's R07, and it fires on a *missing* review, not just a disagreement. Here it confirms, all eleven rules pass, and the action runs." | the reviewer, then `auto`, the executed action |
+| 2:45–3:20 | "Two agents, not one. The reviewer has a different prompt and is never told how confident the proposer was. Nothing runs unattended until a review is on the record — that's R07, and it fires on a *missing* review, not just a disagreement. Here it confirms, all twelve rules pass, and the action runs." | the reviewer, then `auto`, the executed action |
 | 3:20–3:50 | "Every decision leaves a receipt, chained by sha256. Held by the robot. Attempted by a human. Failed, with the reason. Edit any earlier entry and this verification fails." | the receipt chain on CLSD-3, `Chain verified` |
 | 3:50–4:10 | "And a project *is* a rule pack. Same incident, different posture, no code change." | toggle unattended off, re-run, different verdict |
 | 4:10–4:35 | "What I won't claim: the traffic here is a demo site, there's no measured noise-reduction number because an honest one needs a real queue, and rule R08 checks the reviewer's citations — not the proposer's. All of that is in the limits doc, written before you asked." | `docs/LIMITS.md` on screen |
@@ -50,7 +75,7 @@ Capture **tab-scoped only** — never a full desktop. Each of these is a separat
 
 - [ ] CLSD-1 Rovo card showing `confidence 0.90` and the invented outage rationale
 - [ ] The verdict `Held by R04, R07`
-- [ ] The panel: evidence, digest, eleven rules
+- [ ] The panel: evidence, digest, twelve rules
 - [ ] The rule pack editor with the per-action ceilings
 - [ ] CLSD-3 held under R05 with nine rules passing
 - [ ] The reviewer confirming, then `auto` + executed

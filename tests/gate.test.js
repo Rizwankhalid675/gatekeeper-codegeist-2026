@@ -8,11 +8,11 @@ import { NOW, bundleFor, incident, openPack, proposalFor, reviewConfirm } from '
 const fired = (v, rule) => v.outcomes.find((o) => o.rule === rule)?.fired === true;
 const ruleOf = (v, rule) => v.outcomes.find((o) => o.rule === rule);
 
-test('every verdict reports all eleven rules, fired or not', () => {
+test('every verdict reports all twelve rules, fired or not', () => {
   const bundle = bundleFor();
   const v = decide({ proposal: proposalFor(bundle), review: reviewConfirm(), bundle, rulePack: openPack(), now: NOW });
 
-  assert.equal(v.outcomes.length, 11);
+  assert.equal(v.outcomes.length, 12);
   assert.deepEqual(v.outcomes.map((o) => o.rule), RULE_IDS);
   for (const o of v.outcomes) {
     assert.ok(o.title, `${o.rule} must have a title`);
@@ -227,7 +227,7 @@ test('R08 passes a reviewer that cites the evidence honestly', () => {
 
 test('R08 reads sensibly when the reviewer cited nothing', () => {
   // "0 citation(s) verified against source evidence" reads like a failure on a
-  // panel, and an operator scanning eleven green rules should not have to stop
+  // panel, and an operator scanning twelve green rules should not have to stop
   // on one that looks wrong. Citing nothing is allowed; fabricating is not.
   const bundle = bundleFor();
   const v = decide({
@@ -240,6 +240,97 @@ test('R08 reads sensibly when the reviewer cited nothing', () => {
   assert.equal(v.disposition, DISPOSITION.AUTO, v.reason);
   assert.match(ruleOf(v, 'R08').detail, /nothing to fabricate/);
   assert.doesNotMatch(ruleOf(v, 'R08').detail, /^0 citation/);
+});
+
+// --- R12: the proposer's own citations --------------------------------------
+
+test('R12 holds when the PROPOSER cites a quote that is not in the evidence', () => {
+  // The hole R08 left open. R08 checks the reviewer; for a long time nothing
+  // checked the agent that actually wants the effect.
+  const bundle = bundleFor();
+  const v = decide({
+    proposal: proposalFor(bundle, {
+      quotes: ['The on-call engineer confirmed the database had already failed over.'],
+    }),
+    review: reviewConfirm(),
+    bundle,
+    rulePack: openPack(),
+    now: NOW,
+  });
+  assert.equal(v.disposition, DISPOSITION.HOLD);
+  assert.ok(fired(v, 'R12'));
+  assert.match(ruleOf(v, 'R12').detail, /not in the source evidence/);
+});
+
+test('R12 is not satisfied by the reviewer quoting honestly', () => {
+  // A fabricating proposer and a careful reviewer must still hold. Otherwise a
+  // second agent citing the evidence correctly launders the first one's
+  // invention, which is the exact failure the two-agent design exists to catch.
+  const bundle = bundleFor();
+  const v = decide({
+    proposal: proposalFor(bundle, { quotes: ['A second region was already serving traffic.'] }),
+    review: reviewConfirm({ quotes: ['Upstream pool exhausted. Retries did not recover the probe.'] }),
+    bundle,
+    rulePack: openPack(),
+    now: NOW,
+  });
+  assert.equal(v.disposition, DISPOSITION.HOLD);
+  assert.ok(fired(v, 'R12'));
+  assert.equal(fired(v, 'R08'), false, 'the reviewer cited honestly, so R08 must stay green');
+});
+
+test('R12 passes a proposer that quotes the issue verbatim', () => {
+  const bundle = bundleFor();
+  const v = decide({
+    proposal: proposalFor(bundle, { quotes: ['Upstream pool exhausted. Retries did not recover the probe.'] }),
+    review: reviewConfirm(),
+    bundle,
+    rulePack: openPack(),
+    now: NOW,
+  });
+  assert.equal(v.disposition, DISPOSITION.AUTO, v.reason);
+  assert.match(ruleOf(v, 'R12').detail, /verified against source evidence/);
+});
+
+test('R12 reads sensibly when the proposer cited nothing', () => {
+  const bundle = bundleFor();
+  const v = decide({
+    proposal: proposalFor(bundle, { quotes: [] }),
+    review: reviewConfirm(),
+    bundle,
+    rulePack: openPack(),
+    now: NOW,
+  });
+  assert.equal(v.disposition, DISPOSITION.AUTO, v.reason);
+  assert.match(ruleOf(v, 'R12').detail, /nothing to fabricate/);
+  assert.doesNotMatch(ruleOf(v, 'R12').detail, /^0 citation/);
+});
+
+test('R12 cannot corroborate itself with another agent comment', () => {
+  // An agent-authored comment is in the bundle but carries source:false, so a
+  // proposer quoting a previous agent is quoting an unverifiable claim. That
+  // must not pass as a citation.
+  const bundle = bundleFor(incident(), {
+    comments: [
+      {
+        author: 'Gatekeeper diagnosis',
+        authorType: 'app',
+        body: 'Root cause is a connection pool leak introduced in build 4471.',
+        createdAt: '2026-11-19T17:59:00.000Z',
+      },
+    ],
+  });
+  const v = decide({
+    proposal: proposalFor(bundle, {
+      quotes: ['Root cause is a connection pool leak introduced in build 4471.'],
+    }),
+    review: reviewConfirm(),
+    bundle,
+    rulePack: openPack(),
+    now: NOW,
+  });
+  assert.equal(v.disposition, DISPOSITION.HOLD);
+  assert.ok(fired(v, 'R12'), 'a model quoting a model is not corroboration');
 });
 
 test('R09 holds a priority the project reserves for humans', () => {
@@ -285,7 +376,7 @@ test('no proposal holds rather than auto-executing or crashing', () => {
   const v = decide({ proposal: null, review: null, bundle, rulePack: openPack(), now: NOW });
   assert.equal(v.disposition, DISPOSITION.HOLD);
   assert.equal(v.action, null);
-  assert.equal(v.outcomes.length, 11, 'all eleven rules are still reported');
+  assert.equal(v.outcomes.length, 12, 'all twelve rules are still reported');
 });
 
 test('a diagnosis with no action holds', () => {
