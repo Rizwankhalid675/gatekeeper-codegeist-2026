@@ -33,22 +33,39 @@ const App = () => {
   const [error, setError] = useState(null);
   const [notice, setNotice] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [projects, setProjects] = useState(null);
+  const [projectKey, setProjectKey] = useState(null);
 
-  const load = async () => {
-    const r = await invoke('getRulePack', {}).catch((e) => ({
+  const safeInvoke = (name, payload) =>
+    invoke(name, payload).catch((e) => ({
       ok: false,
       error: `The Gatekeeper resolver did not respond: ${e?.message || e}`,
     }));
+
+  const load = async (key) => {
+    const r = await safeInvoke('getRulePack', key ? { projectKey: key } : {});
     if (r.ok) {
       setPack(r.rulePack);
+      setProjectKey(r.rulePack.projectKey);
       setError(null);
     } else {
       setError(r.error);
     }
   };
 
+  // A global page has no project in its context, so the editor has to ask which
+  // project is being configured. A project settings page does have one, and
+  // then this picker never appears.
   useEffect(() => {
-    load();
+    (async () => {
+      const b = await safeInvoke('bootstrap', {});
+      if (!b.ok) {
+        setError(b.error);
+        return;
+      }
+      setProjects(b.projects);
+      if (b.contextProjectKey) await load(b.contextProjectKey);
+    })();
   }, []);
 
   if (error) {
@@ -58,12 +75,40 @@ const App = () => {
       </SectionMessage>
     );
   }
-  if (!pack) return <Spinner label="Loading the rule pack" />;
+
+  if (!pack) {
+    if (!projects) return <Spinner label="Loading" />;
+    return (
+      <Stack space="space.200">
+        <Heading as="h2">Gatekeeper rules</Heading>
+        <Text>
+          Choose the project to configure. A rule pack is per project — onboarding a team is authoring one of these,
+          not changing code.
+        </Text>
+        {projects.length === 0 ? (
+          <SectionMessage appearance="warning" title="No projects visible">
+            <Text>Gatekeeper cannot see any projects on this site.</Text>
+          </SectionMessage>
+        ) : (
+          <Stack space="space.100">
+            {projects.map((p) => (
+              <Inline key={p.key} space="space.100" alignBlock="center">
+                <Button isDisabled={busy} onClick={() => load(p.key)}>
+                  {p.key}
+                </Button>
+                <Text>{p.name}</Text>
+              </Inline>
+            ))}
+          </Stack>
+        )}
+      </Stack>
+    );
+  }
 
   const save = async (next) => {
     setBusy(true);
     setNotice(null);
-    const r = await invoke('saveRulePack', { rulePack: next });
+    const r = await safeInvoke('saveRulePack', { rulePack: next });
     setBusy(false);
     if (r.ok) {
       setPack(r.rulePack);
@@ -81,7 +126,7 @@ const App = () => {
   const loadDemo = async (which) => {
     setBusy(true);
     setNotice(null);
-    const r = await invoke('loadDemoRulePack', { which });
+    const r = await safeInvoke('loadDemoRulePack', { which, projectKey: pack.projectKey });
     setBusy(false);
     if (r.ok) {
       setPack(r.rulePack);

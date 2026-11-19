@@ -30,7 +30,7 @@ const resourceKeys = new Set((manifest.resources || []).map((r) => r.key));
 const ALLOWED_VERBS = new Set(['GET', 'CREATE', 'UPDATE', 'DELETE', 'TRIGGER']);
 
 /** Every module group that renders a UI Kit page and therefore needs a resolver. */
-const UI_KIT_GROUPS = ['jira:issuePanel', 'jira:projectSettingsPage', 'jira:adminPage'];
+const UI_KIT_GROUPS = ['jira:issuePanel', 'jira:projectSettingsPage', 'jira:adminPage', 'jira:globalPage'];
 const ALLOWED_INPUT_TYPES = new Set(['string', 'integer', 'number', 'boolean']);
 
 test('every action an agent lists actually exists', () => {

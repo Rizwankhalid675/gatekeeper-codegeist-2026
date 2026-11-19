@@ -138,6 +138,18 @@ export async function fetchRecentIssues(projectKey, withinMinutes) {
 }
 
 /**
+ * The projects this app can see, for the rule pack editor's project picker.
+ * A global page has no project in its context — that is the whole difference
+ * between it and a project settings page — so the user has to choose one.
+ */
+export async function fetchProjects() {
+  const res = await api.asApp().requestJira(route`/rest/api/3/project/search?maxResults=50&orderBy=key`);
+  await ok(res, 'list projects');
+  const data = await res.json();
+  return (data.values || []).map((p) => ({ key: p.key, name: p.name }));
+}
+
+/**
  * The five effects, and only these five. The executor's effect map names them;
  * nothing else in the app writes to Jira.
  *

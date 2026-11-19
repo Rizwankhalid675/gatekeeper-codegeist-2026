@@ -32,6 +32,7 @@ import {
   fetchComments,
   fetchIncident,
   fetchLinkedIssues,
+  fetchProjects,
   fetchRecentIssues,
   forgeEffects,
 } from './platform/jira.js';
@@ -209,6 +210,19 @@ resolver.define('approveHeldAction', async ({ context }) => {
   }, 'approve the held action');
 });
 
+/**
+ * What the rule pack editor needs before it can show anything: the project from
+ * context if there is one (project settings page), and the list to choose from
+ * if there is not (global page).
+ */
+resolver.define('bootstrap', async ({ context }) => {
+  return guard(async () => {
+    const contextProjectKey = context?.extension?.project?.key || null;
+    const projects = await fetchProjects();
+    return { ok: true, contextProjectKey, projects };
+  }, 'list the projects');
+});
+
 resolver.define('getRulePack', async ({ context, payload }) => {
   const projectKey = payload?.projectKey || context?.extension?.project?.key;
   if (!projectKey) return { ok: false, error: 'No project in context.' };
@@ -232,9 +246,12 @@ resolver.define('saveRulePack', async ({ payload }) => {
  * incident decided differently without authoring a pack by hand.
  */
 resolver.define('loadDemoRulePack', async ({ context, payload }) => {
-  const projectKey = context?.extension?.project?.key;
+  // The project comes from the payload on a global page and from context on a
+  // project settings page. Context alone would make this unusable from the one
+  // surface that is actually reachable in the Jira navigation.
+  const projectKey = payload?.projectKey || context?.extension?.project?.key;
   const which = payload?.which === 'acme' ? 'ACME' : 'NW';
-  if (!projectKey) return { ok: false, error: 'No project in context.' };
+  if (!projectKey) return { ok: false, error: 'No project selected.' };
 
   return guard(async () => {
     const packs = demoRulePacks();

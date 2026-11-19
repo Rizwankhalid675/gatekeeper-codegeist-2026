@@ -219,7 +219,19 @@ modules:
       render: native
       title: Gatekeeper rules
 
-  # A globally reachable surface for the rule pack editor. jira:projectSettingsPage
+  # The reachable surface for the rule pack editor: jira:globalPage appears in
+  # the Apps section of Jira's main navigation, which is where the site's other
+  # apps are listed and where a judge will actually look. Only one globalPage is
+  # allowed per app.
+  jira:globalPage:
+    - key: gatekeeper-rules
+      resource: settings
+      resolver:
+        function: resolver
+      render: native
+      title: Gatekeeper rules
+
+  # A second surface for site admins. jira:projectSettingsPage
   # is documented as working in JSM, but it does not appear in the new JSM "Space
   # settings" navigation on a current demo site — verified by inspecting the nav,
   # where only Automation is listed under Apps. An admin page is always reachable
