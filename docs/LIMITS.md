@@ -5,24 +5,34 @@ because a judge who finds a weakness you did not name stops believing the rest,
 and because the thesis of this project is that unfalsifiable safety claims are
 worthless.
 
-Last updated 19 Nov 2026.
+Last updated 19 Nov 2026, after the first successful deploy.
 
 ## Not verified against a live Atlassian site
 
-**This is the big one.** All 118 tests run against fakes at the Jira seam. What has
+**This is the big one.** All 119 tests run against fakes at the Jira seam. What has
 actually been verified:
 
 | | Status |
 |---|---|
-| The gate, executor, receipt chain, correlation, quote verification | tested, 118 tests, no network |
-| `manifest.yml` structure, resource files, YAML validity | verified by the real `forge lint` |
+| The gate, executor, receipt chain, correlation, quote verification | tested, 119 tests, no network |
+| `manifest.yml` structure, resource files, YAML validity | verified by the real `forge lint` — **no issues found** |
 | Manifest cross-references against the code | verified by `tests/manifest.test.js` |
+| `forge deploy` | **done** — v2.1.0 on the development environment, lint clean |
 | Jira REST calls in `src/platform/jira.js` | **never executed** |
 | A real Rovo conversation invoking the actions | **never happened** |
-| `forge deploy` / `forge install` | **never run** |
+| `forge install` into a site | **not yet run** |
 
-Full `forge lint`, deploy and install all need an Atlassian login. Until that has
-happened, treat the Jira integration as unverified.
+The app now deploys with a clean lint, which rules out a whole class of
+structural problem. It rules out nothing about the Jira integration: deploying
+means the code was accepted, not that a single request to Jira has ever been
+made. Treat `src/platform/jira.js` as unverified until an issue has actually
+been triaged in a real site.
+
+Two manifest errors only the real linter found, recorded because neither is in
+the documentation: strings are capped at **255 characters**, and when one
+exceeds it the schema's `oneOf` *also* reports `action required properties are
+'function, description, actionVerb, key'` — which is a red herring pointing at a
+field that is perfectly fine. `tests/manifest.test.js` now guards the limit.
 
 Prior experience on an equivalent project is the reason this is stated so
 bluntly: a build with 75 passing tests and a "fully implemented" cloud path had
@@ -113,6 +123,6 @@ generator rather than the system.
   failed attempt (`RECEIPT_EVENT.FAILED`). It does not cover a Jira call that
   succeeded while the response was lost in transit; that would be recorded as
   failed when it actually happened.
-- "118 tests" — a count, not a coverage figure. The front end has no tests at
+- "119 tests" — a count, not a coverage figure. The front end has no tests at
   all; it is deliberately logic-free, but "deliberately logic-free" is an
   assertion about code nobody has tested.

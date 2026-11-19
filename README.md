@@ -37,7 +37,7 @@ Three trust levels, and they are the architecture:
 
 | Criterion | How we meet it | Where to see it |
 |---|---|---|
-| Technological Implementation | Two Rovo agents with separated duties, an eleven-rule gate that is a pure function, an executor that re-derives its own authorisation, and a sha256 receipt chain. 118 tests, no Forge runtime needed to run them. | [`src/gate/gate.js`](src/gate/gate.js), [`src/executor.js`](src/executor.js), `npm test` |
+| Technological Implementation | Two Rovo agents with separated duties, an eleven-rule gate that is a pure function, an executor that re-derives its own authorisation, and a sha256 receipt chain. 119 tests, no Forge runtime needed to run them. | [`src/gate/gate.js`](src/gate/gate.js), [`src/executor.js`](src/executor.js), `npm test` |
 | Design | A finished product surface, not a proof of concept: the console shows the evidence, the agent handoff, **all eleven rules including the ones that passed**, and the receipt chain with its verification state. A project settings page where onboarding a team is authoring a rule pack. | [`src/frontend/console.jsx`](src/frontend/console.jsx), [`src/frontend/settings.jsx`](src/frontend/settings.jsx) |
 | Potential Impact | The failure mode this addresses is specific and current: teams are being asked to let agents act on production incidents, with "the model said so" as the audit trail. Gatekeeper is a shape for doing it that an administrator can actually sign off. | §1 below, [`docs/LIMITS.md`](docs/LIMITS.md) |
 | Innovation/Idea | The reviewer's citations are re-verified against **source evidence only**, so one agent cannot corroborate another by quoting it back. A fabricated citation is detected and holds the action. Most entries in this space ask you to trust the model more; this one is built to be trusted less. | [`verifyQuotes`](src/gate/evidence.js), rule R08 |
@@ -185,7 +185,7 @@ that would quietly change what the robot may do, and nobody would know which way
 
 | What | Where | Note |
 |---|---|---|
-| Forge | [`manifest.yml`](manifest.yml) | `nodejs22.x`, three scopes, nothing wider |
+| Forge | [`manifest.yml`](manifest.yml) | `nodejs22.x`, three scopes, nothing wider. Deployed clean, and reported **eligible for Runs on Atlassian** — no data egress outside Atlassian, which is the point for an app whose argument is about trust |
 | `rovo:agent` ×2 | `gatekeeper-agent`, `gatekeeper-reviewer` | separate prompts; the proposer is **not** wired to `review-proposal`, so it cannot clear its own R07 |
 | `action` ×6 | [`src/index.js`](src/index.js) | `triage-incident` and `review-proposal` are `CREATE`; the three read-only ones are `GET` |
 | `rovo:mcp` | `gatekeeper-mcp` | exposes **only** the three `GET` actions. An outside agent may inspect this project's policy; it can never act through it. There is a test that fails if a writing action is ever added. |
@@ -204,7 +204,7 @@ that confirming everything is worse than not reviewing at all.
 ## 4. Tests
 
 ```bash
-npm test      # 118 tests, no Forge runtime, no network, no credentials
+npm test      # 119 tests, no Forge runtime, no network, no credentials
 ```
 
 | File | Tests | Covers |
@@ -214,7 +214,7 @@ npm test      # 118 tests, no Forge runtime, no network, no credentials
 | `tests/receipts.test.js` | 15 | the chain, and four distinct ways of tampering with it |
 | `tests/executor.test.js` | 14 | forged, stale and replayed verdicts; human override |
 | `tests/pipeline.test.js` | 24 | the two-agent handoff end to end, with Jira faked at the seam |
-| `tests/manifest.test.js` | 17 | the manifest cross-referenced against the code |
+| `tests/manifest.test.js` | 18 | the manifest cross-referenced against the code |
 
 `tests/manifest.test.js` exists because `forge lint` needs an Atlassian login and so cannot run
 on a fresh clone. It catches the class of mistake lint would not catch anyway — a
@@ -276,11 +276,12 @@ Start with [`AGENTS.md`](AGENTS.md).
 
 Named here before a judge finds them. See [`docs/LIMITS.md`](docs/LIMITS.md) for the full list.
 
-- **Not yet run against a live Atlassian site.** Every one of the 118 tests runs against fakes
-  at the Jira seam. `forge lint` validated the manifest's structure and resources, but full
-  lint, `forge deploy` and a real Rovo conversation all need an Atlassian login, which has not
-  happened yet. Experience says the first live run finds things no local test can — so treat
-  the Jira integration as unverified until it has.
+- **Deployed, but the Jira integration is still unverified.** The app is deployed to its
+  development environment with `forge lint` reporting no issues, which rules out a class of
+  structural problem. It rules out nothing about Jira: not one request in
+  `src/platform/jira.js` has ever executed, and no Rovo conversation has happened. Every one of
+  the 119 tests runs against fakes at the Jira seam. Experience says the first live run finds
+  things no local test can.
 - **Forge storage has no compare-and-swap.** Two concurrent appends to one issue's receipt
   chain could collide and produce a duplicate sequence number. `verifyChain` detects the damage;
   it cannot prevent it.
