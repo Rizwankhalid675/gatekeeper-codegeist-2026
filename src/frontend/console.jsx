@@ -266,7 +266,15 @@ const App = () => {
   const [notice, setNotice] = useState(null);
 
   const load = async () => {
-    setData(await invoke('getConsole'));
+    // invoke() REJECTS when the resolver itself fails to load or throws before
+    // our own error handling runs. Without this catch, `data` stays null and the
+    // panel shows a spinner forever — which is exactly what a judge would see,
+    // with no indication anything is wrong.
+    try {
+      setData(await invoke('getConsole'));
+    } catch (e) {
+      setData({ ok: false, error: `The Gatekeeper resolver did not respond: ${e?.message || e}` });
+    }
   };
 
   useEffect(() => {

@@ -35,7 +35,10 @@ const App = () => {
   const [busy, setBusy] = useState(false);
 
   const load = async () => {
-    const r = await invoke('getRulePack', {});
+    const r = await invoke('getRulePack', {}).catch((e) => ({
+      ok: false,
+      error: `The Gatekeeper resolver did not respond: ${e?.message || e}`,
+    }));
     if (r.ok) {
       setPack(r.rulePack);
       setError(null);

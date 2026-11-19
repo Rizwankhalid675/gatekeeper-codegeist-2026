@@ -11,7 +11,20 @@
  * Forge runtime to run them.
  */
 
-import Resolver from '@forge/resolver';
+import ForgeResolver from '@forge/resolver';
+
+/**
+ * @forge/resolver is CommonJS (`exports.default = Resolver`, with __esModule).
+ * This package sets `"type": "module"`, so the Forge bundler hands us the module
+ * NAMESPACE rather than the class, and `new Resolver()` dies at import time with
+ * "out_namespaceObject is not a constructor" — before any handler can run, so
+ * every resolver call fails and the panel spins forever.
+ *
+ * Unwrapping explicitly works under both interops. Found only by deploying and
+ * reading forge logs; no local test sees this, because locally Node resolves the
+ * same import correctly.
+ */
+const Resolver = ForgeResolver?.default ?? ForgeResolver;
 
 import { KEY } from './shared/contracts.js';
 import { forgeStore } from './platform/store.js';
