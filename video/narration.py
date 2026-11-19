@@ -152,5 +152,21 @@ def synthesise():
     print(f'\nspoken total {total:.0f}s ({int(total) // 60}:{int(total) % 60:02d}) before padding')
 
 
+def export():
+    """
+    Write the lines as a blank-line-separated script, one block per shot.
+
+    narrate-elevenlabs.sh reads this rather than importing Python, and generating
+    it from LINES means the spoken script and the shell script cannot drift apart.
+    """
+    out = ROOT / 'narration-script.txt'
+    out.write_text('\n\n'.join(' '.join(line.split()) for line in LINES) + '\n')
+    words = sum(len(line.split()) for line in LINES)
+    print(f'{out}  —  {len(LINES)} blocks, {words} words')
+
+
 if __name__ == '__main__':
-    synthesise()
+    if '--export' in sys.argv:
+        export()
+    else:
+        synthesise()

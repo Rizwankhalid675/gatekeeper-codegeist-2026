@@ -1,0 +1,33 @@
+This is Gatekeeper. It is a Forge app for incident triage in Jira Service Management, and it is built on one rule. The model proposes. Deterministic code decides. And nothing executes without a receipt.
+
+Here is the incident. This is not an excerpt. It is the entire issue. The summary reads, issue X Y Z. The description reads, issue with this thing. There is nothing else in it.
+
+Before any model is asked anything, Gatekeeper gathers the evidence and hashes it. Two lines of source evidence, taken from Jira itself. Notice the third item is marked derived. That is Gatekeeper's own comment, and it can never count as corroboration, because one model may not vouch for another.
+
+And this is what the agent wrote about that issue. A critical failure in the production database connection pool. There is no outage. There is no database. The model invented it, at ninety percent confidence.
+
+Here is the audit trail, and here is the uncomfortable part. Receipt number two. Executed. All eleven rules passed. The old gate verified the reviewer's citations and took the proposing agent's on trust, so an invented outage was posted to a real issue, and every rule agreed.
+
+So the gate got a twelfth rule. Rule R twelve re-checks the proposing agent's citations against the source evidence. Deterministically, in trusted code, after the model has finished talking.
+
+The same issue, re-run today. Held by rule R seven and rule R twelve. One of one citation is not in the source evidence. The hold names the rule, and the rule names the reason.
+
+Every rule is evaluated on every decision, and every rule is reported. The ten that passed, as well as the two that fired. An operator reading a hold at three in the morning needs to see that the refusal was specific, rather than a blanket no.
+
+The architecture is three trust levels. Correlation is deterministic, and decides what deserves a human at all before a model is asked anything. The two Rovo agents are untrusted. Delete them and there is no diagnosis, but they are never the authority. The gate and the executor are deterministic, and only they may decide.
+
+A project is a rule pack. Onboarding a team means authoring one of these, not changing code. Unattended action is off by default, so installing this app changes nothing about your incident queue until somebody deliberately chooses otherwise.
+
+Each action has a ceiling. Here, commenting and labelling may run unattended. Transitioning an issue and assigning one never do. Rule R five caps an action however confident the model claims to be. That is the knob a team actually turns.
+
+Five effects. That is the executor's entire dispatch table, and there is no path from a model's output to any other Jira call. A new action arrives capped at hold. Clearing it for unattended use is a separate, deliberate click.
+
+Gatekeeper used to record every action a robot took, and nothing at all about the person who decided what robots may do. Now every rule pack change is a receipt too, chained by S H A two fifty six. And the difference says whether the change widened what a robot is allowed to do.
+
+Two administrators can no longer quietly overwrite each other. This tab was editing version eight. The pack had already moved to version nine. The save is refused and nothing is written, so a tightening made after an incident survives somebody else's stale tab.
+
+What I will not claim. The traffic here is a demo site. There is no measured noise reduction number, because an honest one needs a real queue with real labels. Rule R twelve checks that a citation exists. Not that it supports the conclusion drawn from it. All of it is written down in the limits document.
+
+A hundred and sixty nine tests. No Forge runtime, no network, and no credentials needed to run them. The gate is a pure function. The executor re-derives its own authorisation, and ignores the verdict it was handed.
+
+The model proposes. Deterministic code decides. And the model cannot talk its way past it.

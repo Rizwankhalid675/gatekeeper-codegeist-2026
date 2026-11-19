@@ -248,11 +248,11 @@ that confirming everything is worse than not reviewing at all.
 
 ## The demo
 
-`video/gatekeeper-demo.mp4` (4:29, 1080p, narrated) — every screenshot in it is
+`video/gatekeeper-demo.mp4` (4:38, 1080p, narrated) — every screenshot in it is
 Gatekeeper running on a real Jira site. It is a cut of stills with captions and a
 synthesised voice-over rather than a screen recording, and `VIDEO.md` says so
-plainly along with how to rebuild it. The narration is generated locally by
-macOS `say`; the script is `video/narration.py` and the subtitles are in
+plainly along with how to rebuild it. The voice is ElevenLabs River; the spoken
+script is `video/narration.py` and the subtitles are in
 `video/gatekeeper-demo.srt`.
 
 ## 4. Tests

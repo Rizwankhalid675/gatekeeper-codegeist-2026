@@ -23,15 +23,36 @@ thing, which is labelled on screen where it happens: the Atlassian **accountIds*
 in the rule pack history are masked, because the video is going somewhere
 public.
 
-    1920x1080 · h264 · 4:29 · 9 MB · narrated
+    1920x1080 · h264 · 4:38 · 9 MB · narrated · -16.3 LUFS
     video/gatekeeper-demo.srt — subtitles of what is said
 
-**It is narrated.** The voice is macOS's own `say` (Daniel, en_GB, 168 wpm),
-synthesised locally: no API key, no cost, and not a word of this project sent to
-any service. The spoken script is `video/narration.py`, one line per shot, and
-rule ids and digests are spelled there the way a synthesiser gets them right
-("rule R twelve", "S H A two fifty six") while the captions on screen keep the
-real spelling.
+**It is narrated by ElevenLabs**, using **River** (`SAz9YHcvj6GT2YYXdXww`) — the
+same voice the NightShift entry used, chosen there after listening to four
+candidates back to back. `video/narrate-elevenlabs.sh` generates it.
+
+The spoken script is `video/narration.py`, one line per shot, and rule ids and
+digests are spelled there the way a synthesiser gets them right ("rule R twelve",
+"S H A two fifty six") while the captions on screen keep the real spelling.
+`python3 video/narration.py --export` writes `video/narration-script.txt`, which
+is what the shell script reads — generated from the same list, so the two cannot
+drift apart.
+
+**The key.** This project has no `.env` of its own and this session cannot create
+one, so the script falls back to the ElevenLabs key already in
+`aws-msp-hackathon/.env`. Nothing is copied: the file is sourced in place and
+never written to. To keep this project's keys in this project, create
+`hackathons/codegeist-2026/.env` with `ELEVENLABS_API_KEY` and
+`ELEVENLABS_VOICE_ID` and it is preferred automatically. The key is never
+echoed, never passed on a command line where `ps` would show it, and when the
+API refuses, the script describes the key's shape rather than printing it.
+
+**The audio is normalised to -16 LUFS.** The raw read lands around -23, and
+YouTube turns loud uploads down but never turns quiet ones up, so an
+un-normalised master plays noticeably quieter than everything around it.
+
+`video/narration.py` on its own still synthesises with macOS `say` (Daniel,
+en_GB) into the same filenames. That path needs no key, no network and no
+account, and is the fallback if the ElevenLabs quota runs out.
 
 **The narration drives the edit, not the other way round.** Each shot holds for
 exactly as long as its line takes to say, plus 0.7s before and 1.0s after, so the
@@ -40,13 +61,19 @@ onset lands within 0.03s of its shot start.
 
 Rebuild:
 
-    python3 video/narration.py   # outside the Bash sandbox — see below
+    python3 video/narration.py --export                          # the script file
+    ./video/narrate-elevenlabs.sh --voice SAz9YHcvj6GT2YYXdXww   # River
     python3 video/build.py
 
-`say` must run outside the sandbox. Inside it, `say` exits 0 and writes a 4 KB
-file containing no audio at all — `narration.py` checks the file size and fails
-loudly rather than letting a silent video get built. The shot list, durations
-and caption text are in `build.py`; the spoken lines are in `narration.py`.
+Both generators must run **outside the Bash sandbox**, for different reasons:
+`mktemp` is refused inside it, and so is the call to `api.elevenlabs.io`. The
+`say` fallback has a nastier version of the same problem — inside the sandbox it
+exits 0 and writes a 4 KB file containing no audio at all, so `narration.py`
+checks the output size and fails loudly rather than letting a silent video get
+built. The ElevenLabs script checks the same way.
+
+The shot list and caption text are in `build.py`; the spoken lines are in
+`narration.py`. Shot durations are not in either — they come from the audio.
 
 **Why stills and not motion.** macOS screen recording needs a human at the
 keyboard. The browser extension's GIF recorder was tried and measured — 0.81
@@ -58,8 +85,9 @@ thing a judge actually needs to read.
 **What it is missing, and what only you can do:**
 
 - **Judge the voice.** It is a synthesised read, and I cannot hear it to check.
-  If it grates, record yourself over the same cut — the SRT has the cue timings
-  and the shot boundaries are printed by `build.py`.
+  If a line is mispronounced, fix the spelling in `video/narration.py` (that is
+  what "S H A two fifty six" is doing there) and regenerate just that block.
+  If the voice itself is wrong, `--voices` lists the others on the account.
 - **The YouTube upload, public.** Unlisted fails the rule as written. I cannot
   upload to your account.
 - The link then goes in the README *and* on the Devpost submission form.

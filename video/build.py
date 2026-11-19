@@ -378,7 +378,11 @@ def build():
         '-f', 'concat', '-safe', '0', '-i', str(concat),
         *audio_in,
         '-vf', f'fps={FPS},format=yuv420p,fade=t=in:st=0:d=0.6,fade=t=out:st={total - 0.8:.2f}:d=0.8',
-        '-af', f'afade=t=out:st={total - 0.8:.2f}:d=0.8',
+        # loudnorm before the fade. The raw read comes out around -23 LUFS, and
+        # YouTube turns loud uploads down but never turns quiet ones up, so an
+        # un-normalised master plays noticeably quieter than everything around
+        # it. -16 LUFS sits just under YouTube's -14 target.
+        '-af', f'loudnorm=I=-16:TP=-1.5:LRA=11,afade=t=out:st={total - 0.8:.2f}:d=0.8',
         '-c:v', 'libx264', '-preset', 'slow', '-crf', '19',
         *audio_args, '-shortest',
         '-movflags', '+faststart',
