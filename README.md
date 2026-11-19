@@ -41,6 +41,13 @@ Three trust levels, and they are the architecture:
 
 ## How Gatekeeper meets the judging criteria
 
+**Category:** Apps for Software Teams. **Bonus prizes targeted:** Best Agents
+(`rovo:agent`, two agents with separated duties) and Best app with Atlassian MCP
+(`rovo:mcp`). Not the Marketplace prize: submitting for listing would disable the
+installation link judges need, which `docs/EVENT.md` explains.
+
+Stage Two has five criteria, each equally weighted (20%).
+
 | Criterion | How we meet it | Where to see it |
 |---|---|---|
 | Technological Implementation | Two Rovo agents with separated duties, a twelve-rule gate that is a pure function, an executor that re-derives its own authorisation, and a sha256 receipt chain. 169 tests, no Forge runtime needed to run them. | [`src/gate/gate.js`](src/gate/gate.js), [`src/executor.js`](src/executor.js), `npm test` |
@@ -254,6 +261,19 @@ synthesised voice-over rather than a screen recording, and `VIDEO.md` says so
 plainly along with how to rebuild it. The voice is ElevenLabs River; the spoken
 script is `video/narration.py` and the subtitles are in
 `video/gatekeeper-demo.srt`.
+
+## The numbers, and the one we refuse to invent
+
+| Measured | Value | How |
+|---|---|---|
+| Test suite | 169 tests in ~150 ms | `node --test tests/*.test.js`, no network, no Forge runtime, no credentials |
+| Rules evaluated per decision | 12 of 12, always | every verdict carries all twelve outcomes; `tests/gate.test.js` asserts the set is intact |
+| Effects reachable from a model | 5 | the executor's whole dispatch table; anything else is refused at save time |
+| Live effects exercised on a real site | 5 of 5 | `docs/LIMITS.md`, "All five effects exercised live" |
+
+**Not measured, and not estimated: alert-noise reduction.** An honest figure
+needs a real queue with real labels, and the traffic here is a demo site. There
+is no percentage in this repo because there is no percentage we can defend.
 
 ## 4. Tests
 

@@ -71,7 +71,18 @@ Three categories, one grand-prize set each (1st $15k / 2nd $8k / 3rd $5k):
 | Best Agents | Forge app including `rovo:agent`, `rovo:agentConnector`, or reusable `rovo:skill` / `rovo:action` other agents can invoke | **primary target** — the triage agent ships as a `rovo:agent` |
 | Best app with Atlassian MCP | exposes tools via the Atlassian MCP server using `rovo:mcp` | **target** — expose the policy gate as an MCP tool |
 | Best Teamwork Graph integration | connects data into, and/or consumes data from, the Teamwork Graph API | stretch |
-| Best Marketplace published app | published to Marketplace, or submitted for listing; give the listing link or the review-ticket link | cheap — submitting for listing qualifies |
+| Best Marketplace published app | published to Marketplace, or submitted for listing; give the listing link or the review-ticket link | **DO NOT ENTER — see below** |
+
+**The Marketplace bonus is a trap, and the note above used to say "cheap".** The
+developer console's distribution page states, verbatim:
+
+> once your app has a license in the app manifest, or has been submitted for
+> listing on Marketplace, it can't be shared via installation link
+
+The installation link is a **required** submission item — judges install the app
+themselves. Submitting for Marketplace listing would remove the link and make
+the entry uninstallable, which is precisely the failure that sank the AWS entry.
+Found 19 Nov while turning sharing on. Chase the other three bonuses.
 
 Prize stacking, verbatim:
 
