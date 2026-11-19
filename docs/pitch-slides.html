@@ -103,7 +103,7 @@
         <tr><td>v3</td><td>A failing effect now writes a `failed` receipt before the error surfaces</td><td>An authorised action that was attempted never goes unrecorded</td><td>PASSED</td></tr>
       </tbody>
     </table>
-    <p class="lead" style="margin-top:1.2rem">npm test — 118 tests, no network and no credentials. Quote verification runs against SOURCE evidence only, so one agent cannot corroborate another by quoting it back.</p>
+    <p class="lead" style="margin-top:1.2rem">npm test — 119 tests, no network and no credentials. Quote verification runs against SOURCE evidence only, so one agent cannot corroborate another by quoting it back.</p>
   </section>
 
   <!-- 5. WHAT'S NEXT + honest limit -->
@@ -113,7 +113,7 @@
     <div class="grid">
       <div class="card"><div class="n">Today</div><div class="l">19 November 2026</div></div>
       <div class="card"><div class="n">Next</div><div class="l">First real install on a developer site, then the four first-contact risks named in docs/LIMITS.md: ADF parsing shifting the evidence digest, the JQL search shape, workflow transition names, and app-comment author identity — that last one silently disables the self-corroboration guard if it is wrong.</div></div>
-      <div class="card"><div class="n">Honest limit</div><div class="l">Not yet verified against a live Atlassian site. All 118 tests run against fakes at the Jira seam; forge lint validated the manifest, but no Jira REST call has executed and no Rovo conversation has happened. There is also no measured noise-reduction figure, because an honest one needs a real queue with real labels.</div></div>
+      <div class="card"><div class="n">Honest limit</div><div class="l">Deployed with a clean lint, but the Jira integration is unverified. All 119 tests run against fakes at the Jira seam; no Jira REST call has executed and no Rovo conversation has happened. There is also no measured noise-reduction figure, because an honest one needs a real queue with real labels.</div></div>
     </div>
     <p class="lead" style="margin-top:1.8rem">Install link added at submission · github.com/Rizwankhalid675</p>
   </section>
