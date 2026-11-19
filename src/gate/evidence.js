@@ -265,7 +265,13 @@ export function buildBundle({ incident, comments = [], linkedIssues = [], correl
       // A comment Gatekeeper itself wrote is not independent evidence. It is in
       // the bundle so agents can see the history, but it may not be quoted as
       // corroboration — same reasoning as agent output.
-      source: !String(c.author || '').startsWith('gatekeeper'),
+      //
+      // The discriminator is accountType === 'app', NOT the author's name. The
+      // first live run proved why: Jira returns an accountId for app-authored
+      // comments, so the name check below never fired, and Gatekeeper's own
+      // receipts were being offered to agents as source evidence — defeating
+      // the whole point of verifying quotes against source only.
+      source: c.authorType !== 'app' && !String(c.author || '').toLowerCase().startsWith('gatekeeper'),
       at: c.createdAt,
     });
   });

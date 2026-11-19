@@ -91,6 +91,11 @@ export async function fetchComments(issueKey) {
   const data = await res.json();
   return (data.comments || []).map((c) => ({
     author: c.author?.accountId === undefined && c.author?.displayName ? c.author.displayName : c.author?.accountId || 'unknown',
+    // Jira marks app-authored comments with accountType 'app'. This is the only
+    // reliable way to recognise our own receipt comments: the display name is
+    // whatever the app is called, and `author` above is an accountId, which
+    // never matches a name-based check.
+    authorType: c.author?.accountType || 'atlassian',
     body: plainText(c.body),
     createdAt: c.created,
   }));

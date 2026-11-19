@@ -43,6 +43,39 @@ published ratio, and a test runner silently running zero tests. The lesson was
 that local tests validate the code against your *model* of the service, and only
 a real call validates the model.
 
+### What the first live run actually settled (19 Nov 2026)
+
+Installed on `one-atlas-vwgf.atlassian.net`, triaged CLSD-1 through the Rovo
+agent end to end. Of the four risks predicted below:
+
+| Risk | Outcome |
+|---|---|
+| ADF parsing shifting the evidence digest | **held up** — digest computed, `1aa79f08c8cf`, stable across reloads |
+| The JQL search endpoint | **held up** — correlation reported "paged, seen 1× in the window" |
+| Workflow transition names | **still untested** — no transition has been attempted |
+| App-comment author identity | **was broken, now fixed** — see below |
+
+Two defects found that no local test could have caught:
+
+1. **Every resolver call failed in the deployed bundle.** `@forge/resolver` is
+   CommonJS; `"type": "module"` in package.json made the Forge bundler resolve
+   the default import to the module namespace, so `new Resolver()` threw at
+   import time. The panel showed a spinner forever. All tests passed throughout.
+2. **Gatekeeper's own receipt comments were being treated as source evidence.**
+   The exclusion tested whether the author string started with `gatekeeper`, but
+   Jira returns an **accountId** for app-authored comments, so it never matched.
+   An agent could have quoted Gatekeeper's own receipt back and had it count as
+   corroboration — defeating the one guard the project is built around. Now keyed
+   on `accountType === 'app'`, with a regression test verified to fail against
+   the old condition.
+
+A third observation, not a defect: asked to triage CLSD-1 — a legal question
+about sanctions — the agent proposed labelling it `gatekeeper-incident` at
+**confidence 0.90**, justifying it as "a critical production database outage".
+There is no outage; the model invented one. The gate held it under R04 and R07
+regardless, which is precisely the argument: the confidence floor would not have
+caught this, because the model was confident and wrong.
+
 Specific things most likely to be wrong on first contact:
 
 - **ADF handling.** `plainText()` walks Atlassian Document Format by hand so the

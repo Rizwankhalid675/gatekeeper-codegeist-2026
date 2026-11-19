@@ -223,6 +223,33 @@ test("Gatekeeper's own comments are not independent evidence", () => {
   assert.equal(verifyQuotes(['I restarted the gateway pool manually at 17:40.'], b).verified, true);
 });
 
+test("an app-authored comment is not source evidence, even though its author is an accountId", () => {
+  // The shape Jira actually returns for a comment Gatekeeper posted, observed on
+  // the first live run: author is an accountId and the display name is "Gatekeeper".
+  // The old check tested whether the author STRING started with "gatekeeper",
+  // which an accountId never does — so our own receipts were being handed to
+  // agents as corroborating source evidence.
+  const receipt = '*Gatekeeper - held* Held by R04, R07: unattended action is switched off for CLSD';
+  const b = bundleFor(incident(), {
+    comments: [
+      { author: '712020:9f1c0a44-0000-4aaa-bbbb-ccccccccdddd', authorType: 'app', body: receipt, createdAt: NOW },
+      { author: '557058:1111-2222', authorType: 'atlassian', body: 'I checked the sanctions list myself.', createdAt: NOW },
+    ],
+  });
+
+  assert.equal(verifyQuotes([receipt], b).verified, false, "Gatekeeper's own receipt must not corroborate anything");
+  assert.equal(verifyQuotes(['I checked the sanctions list myself.'], b).verified, true, 'a human comment is source evidence');
+});
+
+test('a comment with no accountType is still treated as a human comment', () => {
+  // Defensive: if Jira omits accountType, the safe default is to treat it as a
+  // person, because the alternative silently drops real evidence.
+  const b = bundleFor(incident(), {
+    comments: [{ author: '557058:abc', body: 'The upstream pool was restarted at 17:40.', createdAt: NOW }],
+  });
+  assert.equal(verifyQuotes(['The upstream pool was restarted at 17:40.'], b).verified, true);
+});
+
 test('a quote too short to identify anything is not treated as verified', () => {
   const b = bundleFor();
   const short = 'x'.repeat(MIN_QUOTE_CHARS - 1);
