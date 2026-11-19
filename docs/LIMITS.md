@@ -76,6 +76,41 @@ There is no outage; the model invented one. The gate held it under R04 and R07
 regardless, which is precisely the argument: the confidence floor would not have
 caught this, because the model was confident and wrong.
 
+### Verified: the transition effect, the human override, and the failed-receipt path
+
+Exercised live on CLSD-3. The gate held `transition-issue` under R05 (the rule
+pack caps it at hold) and R07. A human then took it from the panel, and the
+effect refused:
+
+    transition "In Progress" is not available on CLSD-3 right now. Available: Start
+
+That is the effect working: it reads the issue's real transitions, refuses a name
+the workflow does not offer, and names the ones it does. The refusal surfaced in
+the panel, and the chain recorded both steps:
+
+    000000  held    gatekeeper:gate   transition-issue  Held by R05, R07...
+    000001  failed  user:712020:...   transition-issue  Attempted by a human... Available: Start
+    Chain verified - 2 receipts
+
+**But the default rule pack ships transition names that match no real workflow.**
+`['Triage', 'In Progress', 'Waiting for support', 'Resolved']` was a guess, and
+the demo site's workflow offers `Start`. An admin currently discovers the right
+names by triggering a failure. The settings page now says so; a better fix would
+list the workflow's real transitions in the editor, which needs an API the gate
+cannot reach from a pure function.
+
+### Known gap: only the REVIEWER's citations are verified
+
+R08 checks `review.quotes`. The proposing agent's `quotes` are parsed, stored and
+shown in the panel, but nothing verifies them. On CLSD-3 the proposer cited a
+line from the chat conversation rather than from the issue evidence, and no rule
+objected — because no rule looks.
+
+This is narrower than it sounds (the proposer's quotes do not authorise anything;
+the reviewer's are what R08 gates) but the README should not be read as saying
+every quote is checked. Verifying the proposer's quotes too would be a small
+change to `decide()` and is the obvious next hardening step.
+
 ### RESOLVED: the blank issue panel (and why the bisect mattered)
 
 `<DynamicTable head={[...]}>` in `console.jsx` passed a bare array where UI Kit

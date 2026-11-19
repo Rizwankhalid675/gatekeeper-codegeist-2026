@@ -247,6 +247,14 @@ const App = () => {
             anything happens.
           </Em>
         </Text>
+        <SectionMessage appearance="warning" title="Transition names are per-workflow">
+          <Text>
+            The permitted values for <Code>transition-issue</Code> must match this project's workflow exactly, and the
+            defaults shipped here are generic placeholders that will not match most workflows. Gatekeeper does not
+            guess: if a name is not available on the issue it refuses the action and names the ones that are, which is
+            the quickest way to find the right values — but it finds them at execution time, not here.
+          </Text>
+        </SectionMessage>
       </Stack>
 
       <Stack space="space.100">

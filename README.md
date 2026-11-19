@@ -128,6 +128,10 @@ against the whole bundle, a reviewer could "corroborate" a diagnosis by quoting 
 back at itself. That is not corroboration. Agent-produced items, and Gatekeeper's own prior
 comments, are excluded from the haystack.
 
+Scope, stated precisely: R08 gates the **reviewer's** citations. The proposing agent's quotes
+are parsed and displayed but not verified — they authorise nothing, so nothing turns on them,
+but "every quote is checked" would be too strong. See [`docs/LIMITS.md`](docs/LIMITS.md).
+
 The check is deliberately forgiving about formatting and completely unforgiving about content:
 whitespace, case and smart quotes are folded, so a reformatted real sentence passes; an invented
 one does not. And it is recomputed **inside the gate**, so a `quotesVerified: true` flag
