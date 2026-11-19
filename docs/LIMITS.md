@@ -76,7 +76,28 @@ There is no outage; the model invented one. The gate held it under R04 and R07
 regardless, which is precisely the argument: the confidence floor would not have
 caught this, because the model was confident and wrong.
 
-### The full path is now verified end to end (19 Nov 2026)
+### OPEN REGRESSION: the issue panel renders blank on v2.7.0
+
+Introduced by the receipt-exclusion fix and found immediately after deploying it.
+The panel header appears; the body is empty. What is known:
+
+- The resolver bundle is healthy — the global settings page, which uses the same
+  bundle and the same resolver, renders correctly on v2.7.0.
+- `forge logs` shows **no** errors since the deploy, so `getConsole` is not
+  throwing. A thrown error would be caught by `guard` and rendered as a message.
+- The panel's menu offers "Collapse", so Jira believes it is expanded.
+- No errors in the top frame's console; the Forge iframe is cross-origin so its
+  own errors are not visible there.
+- It rendered correctly on v2.6.0 and broke on v2.7.0, which changed only
+  `contracts.js`, `receipts.js` and `evidence.js` — none of which `console.jsx`
+  imports. So the likely cause is `getConsole` returning a shape the panel's
+  render cannot handle, failing silently inside the UI Kit reconciler.
+
+Next step is to bisect: redeploy with the receipt filter removed to confirm it is
+the trigger, then narrow within `getConsole`'s return value. **Do not ship while
+this is open** — the panel is the product's main surface.
+
+### The rest of the path is verified end to end (19 Nov 2026)
 
 On `one-atlas-vwgf.atlassian.net`, through the real Rovo agents:
 
