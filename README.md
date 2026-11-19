@@ -4,6 +4,12 @@
 
 Built for **Codegeist 2026** · Category: **Apps for Software Teams** · Bonus: **Best Agents** (`rovo:agent`), **Best app with Atlassian MCP** (`rovo:mcp`)
 
+![Gatekeeper's receipt chain on a live Jira issue: held by the gate, a human attempt that failed with the reason, held again, then overridden and executed - four receipts, chain verified](docs/img/beats/03-receipt-chain-held-failed-overridden.jpg)
+
+*A real run on a live Jira site. The gate held the action; a human attempted it and Jira
+refused the transition, with the reason recorded; the gate held it again; a human finally
+executed it. Four receipts, sha256-chained, verified.*
+
 **Install link:** _added at submission_ · **Demo video:** _added at submission_ · **Limits:** [what doesn't work yet](#honest-limits)
 
 **New & Existing (rules §4).** Gatekeeper was **newly created** by the entrant during the
