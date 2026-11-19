@@ -76,7 +76,30 @@ There is no outage; the model invented one. The gate held it under R04 and R07
 regardless, which is precisely the argument: the confidence floor would not have
 caught this, because the model was confident and wrong.
 
-### OPEN REGRESSION: the issue panel renders blank on v2.7.0
+### RESOLVED: the blank issue panel (and why the bisect mattered)
+
+`<DynamicTable head={[...]}>` in `console.jsx` passed a bare array where UI Kit
+needs `{ cells: [...] }`. DynamicTable throws, the throw escapes the reconciler,
+and the **entire panel** renders blank: header present, body empty, no error on
+screen, nothing in `forge logs`, nothing in the browser console (the Forge iframe
+is cross-origin). `settings.jsx` had the shape right, which is why that page
+never broke and misled the diagnosis.
+
+It was invisible until there was data. The receipts table is only reached once a
+receipt exists, so the panel looked healthy on every fresh issue and broke the
+moment Gatekeeper did anything — the opposite of how a bug usually presents, and
+the reason it was mistaken for a deploy regression.
+
+**The bisect was what corrected it.** The first step — disabling the receipt
+filter and redeploying — came back negative, which ruled out the suspected commit
+and forced a re-reading of the evidence: the panel had rendered on CLSD-1 and
+CLSD-2 *before* triage and failed on all three *after*. Receipt-count dependent,
+not deploy dependent. A negative bisect step is worth as much as a positive one.
+
+`tests/frontend.test.js` now statically checks both this and the unhandled
+`invoke()` rejection, because there is no renderer here to catch either.
+
+### The old entry, for the record: blank panel suspected as a v2.7.0 regression
 
 Introduced by the receipt-exclusion fix and found immediately after deploying it.
 The panel header appears; the body is empty. What is known:

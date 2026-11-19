@@ -221,14 +221,21 @@ function Receipts({ receipts, chainVerified, chainProblem }) {
     );
   }
 
-  const head = [
-    { key: 'seq', content: '#' },
-    { key: 'event', content: 'Event' },
-    { key: 'actor', content: 'Actor' },
-    { key: 'action', content: 'Action' },
-    { key: 'reason', content: 'Reason' },
-    { key: 'digest', content: 'Digest' },
-  ];
+  // head MUST be { cells: [...] }, not a bare array. A bare array makes
+  // DynamicTable throw, and because the throw escapes the UI Kit reconciler it
+  // takes down the ENTIRE panel — header renders, body is blank, no error shown
+  // anywhere, no entry in forge logs. The panel looked fine until the first
+  // receipt existed, because with none the component returns before this table.
+  const head = {
+    cells: [
+      { key: 'seq', content: '#' },
+      { key: 'event', content: 'Event' },
+      { key: 'actor', content: 'Actor' },
+      { key: 'action', content: 'Action' },
+      { key: 'reason', content: 'Reason' },
+      { key: 'digest', content: 'Digest' },
+    ],
+  };
 
   const rows = receipts.map((r) => ({
     key: r.seq,
