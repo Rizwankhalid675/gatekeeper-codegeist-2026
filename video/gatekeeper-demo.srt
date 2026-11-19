@@ -1,0 +1,82 @@
+1
+00:00:00,000 --> 00:00:06,700
+Gatekeeper
+The model proposes. Deterministic code decides. Nothing executes without a receipt.
+
+2
+00:00:07,000 --> 00:00:16,699
+This is the entire issue.
+Summary: "Issue xyz". Description: "issue with this thing".
+
+3
+00:00:17,000 --> 00:00:29,699
+Two lines of source evidence, hashed before any model runs.
+Gatekeeper's own comment is marked derived — one model cannot corroborate another.
+
+4
+00:00:30,000 --> 00:00:38,700
+"Critical failure in the production database connection pool." — about an issue whose entire description is "issue with this thing"
+
+5
+00:00:39,000 --> 00:00:52,700
+Receipt 000002: executed. "All eleven rules passed."
+It posted an outage that does not exist, and every rule agreed.
+
+6
+00:00:53,000 --> 00:01:04,700
+So the gate got a twelfth rule
+R08 verified the reviewer's citations and took the proposer's on trust. That is backwards: the proposer is the one asking to act. R12 — Proposal citations appear in source evidence.
+
+7
+00:01:05,000 --> 00:01:17,700
+Held by R07 and R12.
+"1 of 1 citation(s) are not in the source evidence."
+
+8
+00:01:18,000 --> 00:01:31,700
+Ten passed, two fired, all twelve reported.
+An operator can see the hold was specific rather than a blanket refusal.
+
+9
+00:01:32,000 --> 00:01:44,700
+Three trust levels, and only one of them may decide.
+
+10
+00:01:45,000 --> 00:01:56,700
+Onboarding a team is authoring one of these, not changing code.
+Unattended action is off by default — somebody has to choose otherwise.
+
+11
+00:01:57,000 --> 00:02:09,699
+Comment and label may run unattended. Transition and assign never do.
+R05 caps an action however confident the model claims to be.
+
+12
+00:02:10,000 --> 00:02:22,699
+Five effects — the executor's whole dispatch table.
+A new action arrives capped at hold; clearing it is a separate, deliberate click.
+
+13
+00:02:23,000 --> 00:02:36,699
+Every rule pack change is a receipt, chained by sha256.
+The diff says whether a change widened what a robot may do.
+
+14
+00:02:37,000 --> 00:02:49,699
+"You are changing v8, but CLSD is now at v9. Nothing was saved."
+A tightening made after an incident survives somebody else's stale tab.
+
+15
+00:02:50,000 --> 00:03:04,699
+The limits, written before you asked
+The traffic is a demo site. There is no measured noise-reduction number, because an honest one needs a real queue with real labels. R12 checks that a citation exists — not that it supports the conclusion. Forge storage has no compare-and-swap, so the conflict check is a check, not a guarantee. All of it is in docs/LIMITS.md.
+
+16
+00:03:05,000 --> 00:03:16,699
+169 tests, no Forge runtime, no network
+The gate is a pure function: no clock, no storage, no network. The executor re-derives its own authorisation and ignores the verdict handed to it. Every screenshot in this video is the app running on a real Jira site.
+
+17
+00:03:17,000 --> 00:03:24,699
+The model cannot talk its way past it
+Repo and install link are on the submission.

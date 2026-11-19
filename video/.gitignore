@@ -1,0 +1,3 @@
+# Intermediate SVG/PNG frames and the concat list. The script regenerates them.
+build/
+check/

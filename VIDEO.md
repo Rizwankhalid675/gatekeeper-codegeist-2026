@@ -11,6 +11,43 @@ required to watch beyond five minutes." **Target 4:30.**
 > better and entirely unscripted — see below. Every beat here is a thing that
 > actually happened on `one-atlas-vwgf.atlassian.net`, not a thing we hope will.
 
+## A cut exists: `video/gatekeeper-demo.mp4` (3:25)
+
+**Built 19 Nov. Read this before you use it, because what it is matters.**
+
+It is **not a screen recording.** It is seventeen shots cut together: real,
+unretouched captures of Gatekeeper running on `one-atlas-vwgf.atlassian.net`,
+with captions over them, plus a few drawn title and diagram cards that read as
+cards. Nothing in it is a mock-up. No screenshot has been edited except one
+thing, which is labelled on screen where it happens: the Atlassian **accountIds**
+in the rule pack history are masked, because the video is going somewhere
+public.
+
+    1920x1080 · h264 · 3:25 · 3.2 MB · silent (AAC silence track)
+    video/gatekeeper-demo.srt — subtitles matching the captions
+
+Rebuild it with `python3 video/build.py`. The shot list, durations and caption
+text are all in that file; edit and re-run.
+
+**Why stills and not motion.** macOS screen recording needs a human at the
+keyboard. The browser extension's GIF recorder was tried and measured — 0.81
+fps, see below — and is not usable footage. Still frames of the real thing are
+more honest than either a re-enactment or a slideshow pretending to be a
+recording, and at 1080p every rule on the verdict panel is legible, which is the
+thing a judge actually needs to read.
+
+**What it is missing, and what only you can do:**
+
+- **Narration.** The cut is silent and carries its argument in captions. If you
+  want a voice-over, the SRT has the cue timings; record against the picture.
+- **The YouTube upload, public.** Unlisted fails the rule as written. I cannot
+  upload to your account.
+- The link then goes in the README *and* on the Devpost submission form.
+
+**If you would rather have a real screen recording**, the beat-by-beat script
+below still stands and is still the better artefact — the cut above is the
+floor, not the ceiling.
+
 ## Re-shoot the beat frames before recording
 
 `docs/img/beats/02-*` and `04-*` were captured against the **eleven**-rule gate
