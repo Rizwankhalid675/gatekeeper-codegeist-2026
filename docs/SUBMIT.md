@@ -29,7 +29,29 @@ the exact failure that sank the AWS entry. Chase the other three bonuses:
 
 ---
 
-## 1. Upload the video to YouTube — **Public**, not Unlisted
+## 1. ~~Upload the video to YouTube~~ — DONE
+
+Published **public** at https://youtu.be/f8kXQ7paOkg on 19 Nov, on the channel created that day
+(`UC00EhiKqlhqH0CUcSkXFb6w`). Title, description and all 17 chapter marks are
+set; audience is "not made for kids"; the AI-use question is answered **No**,
+because none of the four cases it lists applies — no real person is made to say
+anything, no real footage is altered, no realistic scene is fabricated, and
+there is no AI music. The narration is a synthesised read of a script, which
+that question does not cover.
+
+**Still outstanding, and not required:** subtitles. `video/gatekeeper-demo.srt`
+is ready, but YouTube will not accept it until the video's language is set
+(Studio → the video → Show more → Video language → English, then Subtitles →
+Add). Worth five minutes for accessibility.
+
+**One trap worth knowing.** The video id is `f8kXQ7paOkg` — that is a capital
+**O**, not a zero. Both render near-identically in Studio's font, and
+`f8kXQ7pa0kg` is a dead link. The id in the README was confirmed by fetching
+both and comparing the page titles, not by reading it off the screen.
+
+*(The upload copy is kept below, for a re-upload or a second entry.)*
+
+## 1b. The upload copy
 
 File: `video/gatekeeper-demo.mp4` (4:38, 1080p). Unlisted fails the rule as
 written.
