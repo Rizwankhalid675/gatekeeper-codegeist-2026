@@ -255,6 +255,16 @@ that confirming everything is worse than not reviewing at all.
 
 Privacy policy: [`PRIVACY.md`](PRIVACY.md) — what the app stores, where, and for how long.
 
+## Links
+
+- **Install it** — judges start here: [developer.atlassian.com install link](https://developer.atlassian.com/console/install/56faff4b-563a-4ab7-afcc-b0faba765e7d?signature=AYABeNRGePZ8oKlGgRTVDNctnrwAAAADAAdhd3Mta21zAEthcm46YXdzOmttczp1cy13ZXN0LTI6NzA5NTg3ODM1MjQzOmtleS83MDVlZDY3MC1mNTdjLTQxYjUtOWY5Yi1lM2YyZGNjMTQ2ZTcAuAECAQB4CxqLTo9l4lqXuFjNim1xJM%2Bp%2F3TVP9xHS2BrU5DRRucBunyZ9UKn5efqvjhAQhOUbgAAAH4wfAYJKoZIhvcNAQcGoG8wbQIBADBoBgkqhkiG9w0BBwEwHgYJYIZIAWUDBAEuMBEEDKDF4kTCWDLFicgljAIBEIA7bqH1QsqUEhg%2BnR9zxK2LHS6JBfSgJSmHGZLUeikyD%2Bg8J5Vl56h4yGzM3FHxAfnjkHo%2B3STq0Z7XxQgAB2F3cy1rbXMAS2Fybjphd3M6a21zOmV1LXdlc3QtMTo3MDk1ODc4MzUyNDM6a2V5LzQ2MzBjZTZiLTAwYzMtNGRlMi04NzdiLTYyN2UyMDYwZTVjYwC4AQICAHi9bVMAkme4qVQX1fQHo6ePw3H40A7cGfz7yrmSfBWMXgGtS0Ga3qVgVAN7YLvHbhdeAAAAfjB8BgkqhkiG9w0BBwagbzBtAgEAMGgGCSqGSIb3DQEHATAeBglghkgBZQMEAS4wEQQMnbDsdBUWEdtPImxqAgEQgDuaM95zmLFXR1T1FPKquP%2BQKninIGQJ98lX7HgI5X63wFhDtYgl%2F%2Bv51uwiX63WSi8juSczCZVlkKxqYAAHYXdzLWttcwBLYXJuOmF3czprbXM6dXMtZWFzdC0xOjcwOTU4NzgzNTI0MzprZXkvNmMxMjBiYTAtNGNkNS00OTg1LWI4MmUtNDBhMDQ5NTJjYzU3ALgBAgIAeDYASx0XCjkny4iLV6vz%2BKtEGSGT6kdt0QRpkn6D%2FlVEAQyB60BXPJrlgN3zm6m%2BscQAAAB%2BMHwGCSqGSIb3DQEHBqBvMG0CAQAwaAYJKoZIhvcNAQcBMB4GCWCGSAFlAwQBLjARBAy%2BPEX9gVEpxfrRuw8CARCAO4bo4bq5NuiW7oRGPJp%2FzkF8hbI2ssTH%2FaZHSuy92uSVfOmMZeXeFbjYxY9aG2wlH60B0a2nPeK%2BSwbBAgAAAAAMAAAQAAAAAAAAAAAAAAAAAG9t3FNYKGRGd4wbpye6IAD%2F%2F%2F%2F%2FAAAAAQAAAAAAAAAAAAAAAQAAADKeHRPWkp2%2BOaiiy%2BwNxmy28OCnz8CnLymY7fWKxxRxJu%2FzWGMoMy23ZvZoZ0p64JkdS5Eux3L%2FKO6qILA5f%2FUCkfI%3D&product=jira)
+- **Source**: https://github.com/Rizwankhalid675/gatekeeper-codegeist-2026
+- **Demo video**: *(YouTube link goes here once uploaded — `video/gatekeeper-demo.mp4`, 4:38)*
+- **Privacy policy**: [`PRIVACY.md`](https://github.com/Rizwankhalid675/gatekeeper-codegeist-2026/blob/main/PRIVACY.md)
+
+The install link carries a signature and can be rotated from the developer
+console ("Generate new link") if it ever needs revoking.
+
 ## The demo
 
 `video/gatekeeper-demo.mp4` (4:38, 1080p, narrated) — every screenshot in it is

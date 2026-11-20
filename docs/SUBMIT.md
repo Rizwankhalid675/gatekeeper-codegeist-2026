@@ -98,7 +98,14 @@ written.
 
 ---
 
-## 2. Turn on the installation link
+## 2. ~~Turn on the installation link~~ — DONE
+
+Sharing is on, Jira is ticked, and the link is live and in the README. The
+console says "Congratulations, you are ready to share". Nothing left here.
+
+*(Kept below as the record of what was set and why.)*
+
+## 2b. What was set on the distribution page
 
 The app is **already deployed to production** (done 19 Nov, v2.0.0) — that was
 the prerequisite. What is left is a form only you can fill.
