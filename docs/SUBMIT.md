@@ -72,10 +72,17 @@ anything, no real footage is altered, no realistic scene is fabricated, and
 there is no AI music. The narration is a synthesised read of a script, which
 that question does not cover.
 
-**Still outstanding, and not required:** subtitles. `video/gatekeeper-demo.srt`
-is ready, but YouTube will not accept it until the video's language is set
-(Studio → the video → Show more → Video language → English, then Subtitles →
-Add). Worth five minutes for accessibility.
+**Subtitles: done.** `video/gatekeeper-demo.srt` is uploaded and published. The
+order matters — YouTube refuses a subtitle file until the video language is set
+(Studio → the video → Details → Show advanced settings → Video language →
+English → Save), and only then does Subtitles → the pencil → ⋮ → Upload file →
+"With timing" accept it.
+
+It **overwrote YouTube's automatic captions**, which is the point: the ASR track
+had garbled the technical lines (it rendered "the knob a team actually turns" as
+"a team actually turns", and mangled rule ids). The public video now carries two
+tracks — the manual `.en` one, which is the real script, and YouTube's `a.en`
+automatic one, which it keeps regardless.
 
 **One trap worth knowing.** The video id is `f8kXQ7paOkg` — that is a capital
 **O**, not a zero. Both render near-identically in Studio's font, and

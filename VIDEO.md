@@ -213,5 +213,5 @@ the evidence behind this conclusion.
 - **Narration.** Either record it, or generate it (the NightShift project has
   `scripts/make-narration.sh` for ElevenLabs, which reads the key from `.env` and
   never puts it on the command line).
-- **A YouTube upload, public.** Unlisted fails the rule as written.
+- ~~**A YouTube upload, public.**~~ Done: https://youtu.be/f8kXQ7paOkg, with the SRT published as the English caption track.
 - The link then goes in the README *and* on the Devpost submission form.
