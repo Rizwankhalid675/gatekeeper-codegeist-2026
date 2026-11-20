@@ -1,4 +1,37 @@
-# Submitting Gatekeeper to Codegeist 2026
+# Codegeist 2026 — SUBMITTED
+
+**Submitted 19 Nov 2026: <https://devpost.com/software/gatekeeper-nqe6vb>**
+
+Editable until the deadline, **22 Dec 2026 15:00 EST**, so anything below can
+still be changed.
+
+| | |
+|---|---|
+| Category | Apps for Software Teams |
+| Bonus prize | Best Agents — Rovo/Assignable agents |
+| Install link | in the story (Devpost caps the links field at 255 chars; the Forge link is 1454) |
+| Repo | <https://github.com/Rizwankhalid675/gatekeeper-codegeist-2026> |
+| Video | <https://youtu.be/f8kXQ7paOkg> (4:38, public) |
+| App ID | `56faff4b-563a-4ab7-afcc-b0faba765e7d` |
+
+**The bonus prize is single-select.** The plan named two (Best Agents and Best
+app with Atlassian MCP); the form only allows one, so it is Best Agents — two
+Rovo agents with separated duties is the stronger fit and the whole argument of
+the entry. `rovo:mcp` is still described in the technology write-up.
+
+**Registration answers**, so they can be corrected: working solo; heard via
+Devpost; has an Atlassian developer account; AI experience High; Atlassian/Forge
+experience **Low** (first Forge app, which is the honest reading); goals
+Competition and Solving a Problem; first Codegeist. The Atlassian marketing
+opt-in is **off**. The eligibility, rules and age/jurisdiction/not-an-employee
+attestations were ticked to submit — they are statements about you, so check
+you agree with them.
+
+---
+
+## The original plan, kept for a second entry or a re-submission
+
+
 
 Everything that is left, in the order to do it. Deadline **22 Dec 09:00 PT**.
 
